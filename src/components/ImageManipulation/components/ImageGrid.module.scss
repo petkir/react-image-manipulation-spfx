@@ -1,0 +1,31 @@
+.ImgGridShadowOverlay{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.4);
+}
+.ImgGridVisible {
+  position: absolute;
+  .ImgGridTabel {
+    display: table;
+    &>div {
+      display: table-row;
+      &>div {
+        display: table-cell;
+        border: 1px solid rgba(255,255,255,0.3);
+      }
+    }
+
+    /*
+    .ImgGridRowTop {
+      .ImgGridCellLeft {}
+      .ImgGridCellCenter {}
+      .ImgGridCellRight {}
+    }
+    .ImgGridRowMiddle {}
+    .ImgGridRowBottom {}
+*/
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "isCreatingSolution": true,
+    "environment": "onprem19",
+    "version": "1.11.0",
+    "libraryName": "react-image-manipulation-spfx",
+    "libraryId": "bced0fe7-e76e-4344-b84d-021249bef2a7",
+    "packageManager": "npm",
+    "componentType": "webpart"
+  }
+}

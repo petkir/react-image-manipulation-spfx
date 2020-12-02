@@ -1,0 +1,30 @@
+.imageEditor{
+  width: 100%;
+  .commandBar{
+    display: block;
+  }
+  .imageplaceholder{
+    max-width: 100%;
+    position: relative;
+  }
+  .canvasmaxwidth{
+    max-width: 100%;
+  }
+}
+.iconbtn {
+  min-width: 32px;
+  width: 32px;
+  padding: 10px 2px;
+  margin-right: 3px;
+  height: 50px;
+  &>div{
+    display: inline-block;
+  }
+  .imgtext{
+    display: block;
+  }
+  .imgicon{
+    display: block;
+  }
+
+}
