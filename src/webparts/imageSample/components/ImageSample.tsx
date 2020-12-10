@@ -5,6 +5,7 @@ import { IImageSampleProps } from './IImageSampleProps';
 import ImageFocusPoint, { IFocusPoint } from '../../../components/ImageFocusPoint/ImageFocusPoint';
 import ImageManipulation, { IImageManipulationSettings } from '../../../components/ImageManipulation/ImageManipulation';
 import { DisplayMode } from '@microsoft/sp-core-library';
+import SpfxImageEditor from '../../../components/SpfxImageEditor/SpfxImageEditor';
 
 export interface IImageSampleState {
   isEditing: boolean;
@@ -27,8 +28,11 @@ export default class ImageSample extends React.Component<IImageSampleProps, IIma
     }
   }
   public render(): React.ReactElement<IImageSampleProps> {
+ /* imgUrl={"https://media.gettyimages.com/photos/whitewater-paddlers-descend-vertical-waterfall-in-kayak-picture-id1256321293?s=2048x2048"}
+   */
 
-    return (
+
+return (
       <div>
         <ImageManipulation
           settings={this.state.settings}
@@ -41,7 +45,7 @@ export default class ImageSample extends React.Component<IImageSampleProps, IIma
           src={'https://media.gettyimages.com/photos/whitewater-paddlers-descend-vertical-waterfall-in-kayak-picture-id1256321293?s=2048x2048'}
         />
       </div>
-    )
+);
 
     /*
             <ImageFocusPoint

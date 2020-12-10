@@ -9,6 +9,7 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports":true,
     "typeRoots": [
       "./node_modules/@types",
       "./node_modules/@microsoft"

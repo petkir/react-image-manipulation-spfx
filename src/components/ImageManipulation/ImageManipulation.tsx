@@ -17,7 +17,8 @@ export enum ManipulationType {
   Scale,
   Rotate,
   Flip,
-  Filter
+  Filter,
+  Resize
 }
 
 export enum FilterType {
@@ -60,8 +61,12 @@ export interface IFilterSettings extends IManipulationBase {
   nvalue?: number;
   svalue?: string;
 }
+export interface IResizeSettings extends IManipulationBase {
+  width: number;
+  height: number;
+}
 
-export type IImageManipulationSettings = IFilterSettings | IRotateSettings | IScaleSettings | IFlipSettings | ICropSettings;
+export type IImageManipulationSettings = IFilterSettings | IRotateSettings | IScaleSettings | IFlipSettings | ICropSettings | IResizeSettings;
 
 export interface IImageManipulationConfig {
   rotateButtons: number[];
@@ -149,10 +154,15 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
   }
   private applySettings(): void {
     console.log('applySettings');
-    this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
+    this.bufferRef.width = this.img.width;
+    this.bufferRef.height = this.img.height;
+    this.bufferCtx.clearRect(0, 0, this.img.width, this.img.height);
     this.bufferCtx.drawImage(this.img, 0, 0);
     this.bufferCtx.save();
-    // this.canvasCtx.drawImage(this.img, 0, 0);
+
+
+    this.manipulateRef.width = this.canvasRef.width = this.bufferRef.width;
+    this.manipulateRef.height = this.canvasRef.height = this.bufferRef.height;
 
     this.props.settings.forEach(element => {
       switch (element.type) {
@@ -204,8 +214,8 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
             let height = this.manipulateRef.height;
             let width = this.manipulateRef.width;
             //this.canvasctx.translate(this.canvasRef.width / 2, this.canvasRef.height / 2);
-           // width = width * scale.scale;
-           // height = height * scale.scale;
+            // width = width * scale.scale;
+            // height = height * scale.scale;
             this.manipulateCtx.translate(width / 2, height / 2);
             this.manipulateCtx.scale(scale.scale, scale.scale);
             this.manipulateCtx.translate(width / 2 * -1, height / 2 * -1);
@@ -239,17 +249,44 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
           this.bufferCtx.restore();
           this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
 
-          this.bufferRef.width=sourceWidth;
-          this.bufferRef.height=sourceHeight;
+          this.bufferRef.width = sourceWidth;
+          this.bufferRef.height = sourceHeight;
 
           this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
           this.bufferCtx.save();
-          this.manipulateRef.width=sourceWidth;
-          this.manipulateRef.height=sourceHeight;
+          this.manipulateRef.width = sourceWidth;
+          this.manipulateRef.height = sourceHeight;
 
           break;
-      }
 
+        case ManipulationType.Resize:
+          debugger
+          const resize = element as IResizeSettings;
+          this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
+          this.manipulateCtx.save();
+
+          const targetWidth = resize.width;
+          const targetHeight = resize.height;
+
+
+          this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
+          this.manipulateCtx.restore();
+
+          this.bufferCtx.restore();
+          this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
+
+          this.bufferRef.width = targetWidth;
+          this.bufferRef.height = targetHeight;
+
+          this.bufferCtx.drawImage(this.manipulateRef, 0, 0, targetWidth, targetHeight);
+          this.bufferCtx.save();
+
+          this.manipulateRef.width = targetWidth;
+          this.manipulateRef.height = targetHeight;
+          this.canvasRef.width = targetWidth;
+          this.canvasRef.height = targetHeight;
+
+      }
     });
     //  this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
     //  this.bufferCtx.drawImage(this.img, 0, 0);
@@ -258,21 +295,21 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
        (this.state.settingPanel !== SettingPanelType.Crop && this.props.settings.crop)) {
          */
 
-        const filters = this.props.settings.filter((x) => x.type === ManipulationType.Filter);
-        filters.forEach(element => {
-          const filter = element as IFilterSettings;
-          var imageData = this.bufferCtx.getImageData(0, 0, this.bufferRef.width, this.bufferRef.height);
-          switch (filter.filterType) {
-            case FilterType.Grayscale:
-              imageData = new GrayscaleFilter().process(imageData, this.bufferRef.width, this.bufferRef.height, undefined, undefined);
-              break;
-            case FilterType.Sepia:
-              imageData = new SepiaFilter().process(imageData, this.bufferRef.width, this.bufferRef.height, undefined, undefined);
-              break;
-          }
-          this.bufferCtx.putImageData(imageData, 0, 0);
+    const filters = this.props.settings.filter((x) => x.type === ManipulationType.Filter);
+    filters.forEach(element => {
+      const filter = element as IFilterSettings;
+      var imageData = this.bufferCtx.getImageData(0, 0, this.bufferRef.width, this.bufferRef.height);
+      switch (filter.filterType) {
+        case FilterType.Grayscale:
+          imageData = new GrayscaleFilter().process(imageData, this.bufferRef.width, this.bufferRef.height, undefined, undefined);
+          break;
+        case FilterType.Sepia:
+          imageData = new SepiaFilter().process(imageData, this.bufferRef.width, this.bufferRef.height, undefined, undefined);
+          break;
+      }
+      this.bufferCtx.putImageData(imageData, 0, 0);
 
-        });
+    });
 
     /*this.canvasCtx.clearRect(0, 0, this.canvasRef.width, this.canvasRef.height)
   //  this.canvasCtx.drawImage(this.bufferRef, 0, 0);
@@ -284,9 +321,9 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 */
     this.canvasCtx.clearRect(0, 0, this.canvasRef.width, this.canvasRef.height);
     this.canvasRef.width = this.bufferRef.width
-    this.canvasRef.height =this.bufferRef.height
+    this.canvasRef.height = this.bufferRef.height
     //this.canvasCtx.drawImage(this.bufferRef, 0, 0);
-    this.canvasCtx.drawImage(this.bufferRef, 0, 0,this.bufferRef.width,this.bufferRef.height);
+    this.canvasCtx.drawImage(this.bufferRef, 0, 0, this.bufferRef.width, this.bufferRef.height);
 
     //    let height = this.canvasRef.height;
     //    let width = this.canvasRef.width;
@@ -298,6 +335,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
 
   public render(): React.ReactElement<IImageManipulationProps> {
+
     return (
       <div className={styles.imageEditor} >
         <div className={styles.commandBar}>
@@ -305,6 +343,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
             iconProps={{ iconName: 'Picture' }}
             title='Resize'
             ariaLabel='Resize'
+            onClick={() => this.openPanel(SettingPanelType.Resize)}
           />
 
           <IconButton
@@ -351,16 +390,49 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
             {this.renderPanelContent()}
           </Panel>
         </div>
-        <div className={styles.imageplaceholder}>
+        <div className={styles.imageplaceholder + ' '+this.getMaxWidth()}
+        style={ this.canvasRef && { width: ''+this.canvasRef.width+'px'}}>
 
+          <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setBufferRef}></canvas>
+          <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setManipulateRef}></canvas>
+          <canvas className={this.getMaxWidth()} ref={this.setCanvasRef}></canvas>
+          {this.state.settingPanel === SettingPanelType.Crop && (this.getCropGrid())}
+          {this.state.settingPanel === SettingPanelType.Resize && (this.getResizeGrid())}
 
-        <canvas className={styles.canvasmaxwidth} style={{ display: 'none' }} ref={this.setBufferRef}></canvas>
-        <canvas className={styles.canvasmaxwidth} style={{ display: 'none' }} ref={this.setManipulateRef}></canvas>
-        <canvas className={styles.canvasmaxwidth} ref={this.setCanvasRef}></canvas>
-       {/*  <ImageGrid left={0} top={10} width={20} height={15} /> */ }
         </div>
       </div>
     );
+  }
+  private getCropGrid(): JSX.Element {
+    const lastset = this.getLastManipulation() as ICropSettings;
+    if (lastset && lastset.type === ManipulationType.Crop) {
+      return (<ImageGrid
+        left={lastset.sx} top={lastset.sy}
+        width={lastset.width} height={lastset.height} />)
+    }
+    return (<ImageGrid
+      left={0} top={0}
+      width={this.canvasRef.width} height={this.canvasRef.height} />)
+  }
+
+  private getResizeGrid(): JSX.Element {
+    const lastset = this.getLastManipulation() as IResizeSettings;
+    if (lastset && lastset.type === ManipulationType.Resize) {
+      return (<ImageGrid
+        left={0} top={0}
+        width={lastset.width} height={lastset.height} />)
+    }
+    return (<ImageGrid
+      left={0} top={0}
+      width={this.canvasRef.width} height={this.canvasRef.height} />)
+  }
+
+  private getMaxWidth(): string {
+    const { settingPanel } = this.state;
+    if (settingPanel === SettingPanelType.Crop || settingPanel === SettingPanelType.Resize) {
+      return '';
+    }
+    return styles.canvasmaxwidth;
   }
 
   private isFilterActive(type: FilterType): boolean {
@@ -403,9 +475,9 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
       case SettingPanelType.Scale:
         return this.getScaleSettings();
       case SettingPanelType.Crop:
-        return this.getCropSettings();;
+        return this.getCropSettings();
       case SettingPanelType.Resize:
-        return (<div></div>);
+        return this.getResizeSettings();
     }
   }
 
@@ -568,6 +640,16 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     </div>);
   }
 
+  private getResizeSettings(): JSX.Element {
+    let resize: IResizeSettings = this.getResizeValues();
+    return (<div>
+      Max Width 100% in display Mode
+      Lock Aspetct Todo
+      <TextField label="Width" value={'' + resize.width} onChanged={(w) => this.setResize(parseInt(w), undefined)} />
+      <TextField label="Height" value={'' + resize.height} onChanged={(h) => this.setResize(undefined, parseInt(h))} />
+
+    </div>);
+  }
   private getScaleSettings(): JSX.Element {
     const lastvalue = this.getLastManipulation();
     let scalevalue = 1;
@@ -595,6 +677,27 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }
       />
     </div>);
+  }
+
+  private getResizeValues(): IResizeSettings {
+    let state: IImageManipulationSettings = this.getLastManipulation()
+    let values: IResizeSettings = {
+      type: ManipulationType.Resize,
+      height: this.bufferRef.height,
+      width: this.bufferRef.width
+    };
+    if (state && state.type === ManipulationType.Resize) {
+      values = state as IResizeSettings;
+    }
+    return values
+  }
+
+  private setResize(width: number, height: number): void {
+    let values = this.getResizeValues();
+    if (width) { values.width = width; }
+    if (height) { values.height = height; }
+
+    this.addOrUpdateLastManipulation(values);
   }
 
   private getCropValues(): ICropSettings {
