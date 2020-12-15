@@ -5,7 +5,7 @@ import { ActionButton, Checkbox, DefaultButton, findIndex, Icon, IconButton, IsF
 import { getStyles } from 'office-ui-fabric-react/lib-es2015/components/Breadcrumb/Breadcrumb.styles';
 import { resultContent } from 'office-ui-fabric-react/lib-es2015/components/ExtendedPicker/PeoplePicker/ExtendedPeoplePicker.scss';
 import * as React from 'react';
-import ImageCropComponent from './components/ImageCrop';
+
 import ImageCrop from './components/ImageCrop';
 import ImageGrid from './components/ImageGrid';
 
@@ -98,15 +98,18 @@ export enum SettingPanelType {
   Rotate = 4,
   Scale = 5,
   Crop = 6,
-  Resize = 7
+  Resize = 7,
+  History = 99
 }
 
 export interface IImageManipulationState {
   settingPanel: SettingPanelType;
+  redosettings: IImageManipulationSettings[];
 }
 
 export default class ImageManipulation extends React.Component<IImageManipulationProps, IImageManipulationState> {
   private img: HTMLImageElement = null;
+  private wrapperRef: HTMLDivElement = null;
   private bufferRef: HTMLCanvasElement = null;
   private bufferCtx: CanvasRenderingContext2D = null;
   private canvasRef: HTMLCanvasElement = null;
@@ -120,7 +123,8 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
     super(props);
 
     this.state = {
-      settingPanel: SettingPanelType.Closed
+      settingPanel: SettingPanelType.Closed,
+      redosettings: []
     };
     this.openPanel = this.openPanel.bind(this);
     this.setRotate = this.setRotate.bind(this);
@@ -171,7 +175,7 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
     this.manipulateRef.width = this.canvasRef.width = this.bufferRef.width;
     this.manipulateRef.height = this.canvasRef.height = this.bufferRef.height;
 
-    this.props.settings.forEach( (element,index) => {
+    this.props.settings.forEach((element, index) => {
       switch (element.type) {
         case ManipulationType.Flip:
           console.log('Has Settings');
@@ -241,8 +245,8 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
           // We need no effect at this time
           break;
         case ManipulationType.Crop:
-          const last = this.props.settings.length === index+1;
-          if( last && this.state.settingPanel === SettingPanelType.Crop) {
+          const last = this.props.settings.length === index + 1;
+          if (last && this.state.settingPanel === SettingPanelType.Crop) {
             //Do nothingis last and current edit
           } else {
             this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
@@ -337,7 +341,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     this.canvasRef.height = this.bufferRef.height
     //this.canvasCtx.drawImage(this.bufferRef, 0, 0);
     this.canvasCtx.drawImage(this.bufferRef, 0, 0, this.bufferRef.width, this.bufferRef.height);
-
+    this.wrapperRef.style.width = this.bufferRef.width + 'px';
     //    let height = this.canvasRef.height;
     //    let width = this.canvasRef.width;
 
@@ -348,19 +352,21 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
 
   public render(): React.ReactElement<IImageManipulationProps> {
-
+//uE2B2
     return (
       <div className={styles.imageEditor} >
         <div className={styles.commandBar}>
+
           <IconButton
-            iconProps={{ iconName: 'Picture' }}
+            iconProps={{ iconName: 'SizeLegacy' }}
+            onRenderIcon={() =>{return (<i className='ms-Button-icon icon-125'>{'\uE74D'}</i>)}}
             title='Resize'
             ariaLabel='Resize'
             onClick={() => this.openPanel(SettingPanelType.Resize)}
           />
 
           <IconButton
-            iconProps={{ iconName: 'Crop' }}
+            iconProps={{ iconName: 'Picture' }}
             title='Crop'
             ariaLabel='Crop'
             onClick={() => this.openPanel(SettingPanelType.Crop)}
@@ -385,12 +391,70 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
             onClick={() => this.openPanel(SettingPanelType.Scale)}
           />
           <IconButton
-            iconProps={{ iconName: 'Filters' }}
+            iconProps={{ iconName: 'AutoEnhanceOff' }}
             title='Filters'
             ariaLabel='Filters'
             onClick={() => this.openPanel(SettingPanelType.Filter)}
           />
-          Undo  Redo Reset History
+          <IconButton
+            iconProps={{ iconName: 'Undo' }}
+            title='Undo'
+            ariaLabel='Undo'
+            disabled={!this.props.settings || this.props.settings.length < 1}
+            onClick={() => {
+              const settings = clone(this.props.settings)
+              const last = settings.pop();
+              const redo = clone(this.state.redosettings);
+              redo.push(last);
+              this.setState({ redosettings: redo },
+                () => {
+                  if (this.props.settingschanged) {
+                    this.props.settingschanged(settings);
+                  }
+                });
+
+            }}
+          />
+          <IconButton
+            iconProps={{ iconName: 'Redo' }}
+            title='Redo'
+            ariaLabel='Redo'
+            disabled={!this.state.redosettings || this.state.redosettings.length < 1}
+            onClick={() => {
+              const redosettings = clone(this.state.redosettings)
+              const redo = redosettings.pop();
+              const settings = clone(this.props.settings);
+              settings.push(redo);
+              this.setState({ redosettings: redosettings },
+                () => {
+                  if (this.props.settingschanged) {
+                    this.props.settingschanged(settings);
+                  }
+                });
+
+            }}
+          />
+         <IconButton
+            iconProps={{ iconName: 'Delete' }}
+            title='Reset'
+            ariaLabel='Reset'
+            disabled={!this.props.settings || this.props.settings.length < 1}
+            onClick={() => {
+              this.setState({ redosettings: [] },
+                () => {
+                  if (this.props.settingschanged) {
+                    this.props.settingschanged([]);
+                  }
+                });
+
+            }}
+          />
+            <IconButton
+            iconProps={{ iconName: 'History' }}
+            title='History'
+            ariaLabel='History'
+            onClick={() => this.openPanel(SettingPanelType.History)}
+          />
           <Panel
             isOpen={this.state.settingPanel != SettingPanelType.Closed}
             type={PanelType.smallFixedFar}
@@ -404,11 +468,13 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           </Panel>
         </div>
         <div className={styles.imageplaceholder + ' ' + this.getMaxWidth()}
-          style={this.canvasRef && { width: '' + this.canvasRef.width + 'px' }}>
+          ref={(element: HTMLDivElement) => { this.wrapperRef = element }}
+          style={this.canvasRef && { width: '' + this.canvasRef.width + 'px' }}
+        >
 
           <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setBufferRef}></canvas>
           <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setManipulateRef}></canvas>
-          <canvas className={this.getMaxWidth()} ref={this.setCanvasRef}></canvas>
+          <canvas className={this.getMaxWidth()} ref={this.setCanvasRef} ></canvas>
           {this.state.settingPanel === SettingPanelType.Crop && (this.getCropGrid())}
           {this.state.settingPanel === SettingPanelType.Resize && (this.getResizeGrid())}
 
@@ -418,16 +484,17 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   }
   private getCropGrid(): JSX.Element {
     const lastset = this.getLastManipulation() as ICropSettings;
-    let lastdata: ICrop = { sx: 0, sy: 0, width: this.canvasRef.width, height: this.canvasRef.height };
-    let isSet :boolean=false;
+    let lastdata: ICrop = { sx: 0, sy: 0, width: 0, height: 0 };
+    let isSet: boolean = false;
     if (lastset && lastset.type === ManipulationType.Crop) {
       lastdata = lastset;
     }
     return (<ImageCrop
       crop={lastdata}
       aspect={undefined}
-      sourceHeight={this.canvasRef.height}
-      sourceWidth={this.canvasRef.width}
+      showRuler
+      sourceHeight={this.img.height}
+      sourceWidth={this.img.width}
       onDragEnd={(e) => { console.log(e); }}
       onComplete={(crop) => { this.setCrop(crop.sx, crop.sy, crop.width, crop.height); }}
       onChange={(crop) => {
@@ -479,6 +546,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         return "Trans_crop";
       case SettingPanelType.Resize:
         return "Trans_resize";
+        case SettingPanelType.History:
+        return "History";
     }
   }
   private onRenderFooterContent(): JSX.Element {
@@ -500,6 +569,9 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         return this.getCropSettings();
       case SettingPanelType.Resize:
         return this.getResizeSettings();
+
+        case SettingPanelType.History:
+        return this.getHistorySettings();
     }
   }
 
@@ -507,6 +579,10 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     this.setState({
       settingPanel: settingPanel
     });
+  }
+
+  private getHistorySettings():JSX.Element {
+    return (<div>PNP Order Item</div>);
   }
 
   private getFilterSettings(): JSX.Element {
@@ -527,7 +603,6 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   }
 
   private toggleFilter(type: FilterType, nvalue: number = undefined, svalue: string = undefined): void {
-    debugger;
     let tmpsettings = clone(this.props.settings);
     if (!tmpsettings) { tmpsettings = []; }
     if (tmpsettings.filter((f) => f.type === ManipulationType.Filter && (f as IFilterSettings).filterType === type).length > 0) {
