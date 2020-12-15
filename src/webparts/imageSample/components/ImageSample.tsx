@@ -5,7 +5,7 @@ import { IImageSampleProps } from './IImageSampleProps';
 import ImageFocusPoint, { IFocusPoint } from '../../../components/ImageFocusPoint/ImageFocusPoint';
 import ImageManipulation, { IImageManipulationSettings } from '../../../components/ImageManipulation/ImageManipulation';
 import { DisplayMode } from '@microsoft/sp-core-library';
-import SpfxImageEditor from '../../../components/SpfxImageEditor/SpfxImageEditor';
+
 
 export interface IImageSampleState {
   isEditing: boolean;

@@ -1,7 +1,9 @@
+/*
+
 import * as React from 'react';
 
-import TuiImageEditor from 'tui-image-editor';
-import 'tui-image-editor/dist/tui-image-editor.css'
+//import TuiImageEditor from 'tui-image-editor';
+//import 'tui-image-editor/dist/tui-image-editor.css'
 
 //import styles from './SpfxImageEditor.module.scss';
 
@@ -103,3 +105,4 @@ export default class SpfxImageEditor extends React.Component<ISpfxImageEditorPro
     this.rootElRef = element;
   }
 }
+*/

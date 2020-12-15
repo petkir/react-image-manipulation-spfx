@@ -5,6 +5,8 @@ import { ActionButton, Checkbox, DefaultButton, findIndex, Icon, IconButton, IsF
 import { getStyles } from 'office-ui-fabric-react/lib-es2015/components/Breadcrumb/Breadcrumb.styles';
 import { resultContent } from 'office-ui-fabric-react/lib-es2015/components/ExtendedPicker/PeoplePicker/ExtendedPeoplePicker.scss';
 import * as React from 'react';
+import ImageCropComponent from './components/ImageCrop';
+import ImageCrop from './components/ImageCrop';
 import ImageGrid from './components/ImageGrid';
 
 import { GrayscaleFilter } from './Filter/GrayscaleFilter';
@@ -39,11 +41,16 @@ export enum FilterType {
 export interface IManipulationBase {
   type: ManipulationType;
 }
-export interface ICropSettings extends IManipulationBase {
+
+export interface ICrop {
   sx: number;
   sy: number;
   width: number;
   height: number;
+}
+
+export interface ICropSettings extends IManipulationBase, ICrop {
+
 }
 export interface IFlipSettings extends IManipulationBase {
   flipX: boolean;
@@ -164,7 +171,7 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
     this.manipulateRef.width = this.canvasRef.width = this.bufferRef.width;
     this.manipulateRef.height = this.canvasRef.height = this.bufferRef.height;
 
-    this.props.settings.forEach(element => {
+    this.props.settings.forEach( (element,index) => {
       switch (element.type) {
         case ManipulationType.Flip:
           console.log('Has Settings');
@@ -234,28 +241,34 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
           // We need no effect at this time
           break;
         case ManipulationType.Crop:
-          this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
-          this.manipulateCtx.save();
-          const crop = element as ICropSettings;
-          const sourceX = crop.sx;
-          const sourceY = crop.sy;
-          const sourceWidth = crop.width;
-          const sourceHeight = crop.height;
+          const last = this.props.settings.length === index+1;
+          if( last && this.state.settingPanel === SettingPanelType.Crop) {
+            //Do nothingis last and current edit
+          } else {
+            this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
+            this.manipulateCtx.save();
+            const crop = element as ICropSettings;
+            const sourceX = crop.sx;
+            const sourceY = crop.sy;
+            const sourceWidth = crop.width;
+            const sourceHeight = crop.height;
 
 
-          this.manipulateCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
-          this.manipulateCtx.restore();
+            this.manipulateCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+            this.manipulateCtx.restore();
 
-          this.bufferCtx.restore();
-          this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
+            this.bufferCtx.restore();
+            this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
 
-          this.bufferRef.width = sourceWidth;
-          this.bufferRef.height = sourceHeight;
+            this.bufferRef.width = sourceWidth;
+            this.bufferRef.height = sourceHeight;
 
-          this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
-          this.bufferCtx.save();
-          this.manipulateRef.width = sourceWidth;
-          this.manipulateRef.height = sourceHeight;
+            this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
+            this.bufferCtx.save();
+            this.manipulateRef.width = sourceWidth;
+            this.manipulateRef.height = sourceHeight;
+          }
+
 
           break;
 
@@ -390,8 +403,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
             {this.renderPanelContent()}
           </Panel>
         </div>
-        <div className={styles.imageplaceholder + ' '+this.getMaxWidth()}
-        style={ this.canvasRef && { width: ''+this.canvasRef.width+'px'}}>
+        <div className={styles.imageplaceholder + ' ' + this.getMaxWidth()}
+          style={this.canvasRef && { width: '' + this.canvasRef.width + 'px' }}>
 
           <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setBufferRef}></canvas>
           <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setManipulateRef}></canvas>
@@ -405,14 +418,23 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   }
   private getCropGrid(): JSX.Element {
     const lastset = this.getLastManipulation() as ICropSettings;
+    let lastdata: ICrop = { sx: 0, sy: 0, width: this.canvasRef.width, height: this.canvasRef.height };
+    let isSet :boolean=false;
     if (lastset && lastset.type === ManipulationType.Crop) {
-      return (<ImageGrid
-        left={lastset.sx} top={lastset.sy}
-        width={lastset.width} height={lastset.height} />)
+      lastdata = lastset;
     }
-    return (<ImageGrid
-      left={0} top={0}
-      width={this.canvasRef.width} height={this.canvasRef.height} />)
+    return (<ImageCrop
+      crop={lastdata}
+      aspect={undefined}
+      sourceHeight={this.canvasRef.height}
+      sourceWidth={this.canvasRef.width}
+      onDragEnd={(e) => { console.log(e); }}
+      onComplete={(crop) => { this.setCrop(crop.sx, crop.sy, crop.width, crop.height); }}
+      onChange={(crop) => {
+        this.setCrop(crop.sx, crop.sy, crop.width, crop.height);
+      }
+      }
+    />);
   }
 
   private getResizeGrid(): JSX.Element {
@@ -420,11 +442,11 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     if (lastset && lastset.type === ManipulationType.Resize) {
       return (<ImageGrid
         left={0} top={0}
-        width={lastset.width} height={lastset.height} />)
+        width={lastset.width} height={lastset.height} />);
     }
     return (<ImageGrid
-      left={0} top={0}
-      width={this.canvasRef.width} height={this.canvasRef.height} />)
+      left={80} top={80}
+      width={this.canvasRef.width - 160} height={this.canvasRef.height - 160} />);
   }
 
   private getMaxWidth(): string {
@@ -436,12 +458,12 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   }
 
   private isFilterActive(type: FilterType): boolean {
-    return (this.props.settings && this.props.settings.filter((f) => f.type === ManipulationType.Filter && (f as IFilterSettings).filterType === type).length > 0)
+    return (this.props.settings && this.props.settings.filter((f) => f.type === ManipulationType.Filter && (f as IFilterSettings).filterType === type).length > 0);
   }
   private closeFilter(): void {
     this.setState({
       settingPanel: SettingPanelType.Closed
-    })
+    });
   }
   private getPanelHeader(settingPanel: SettingPanelType): string {
     switch (settingPanel) {
@@ -484,7 +506,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   private openPanel(settingPanel: SettingPanelType): void {
     this.setState({
       settingPanel: settingPanel
-    })
+    });
   }
 
   private getFilterSettings(): JSX.Element {
@@ -542,7 +564,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           console.log('flip x clicked');
           let last = this.getLastManipulation();
           if (last && last.type === ManipulationType.Flip) {
-            (last as IFlipSettings).flipX = !(last as IFlipSettings).flipX
+            (last as IFlipSettings).flipX = !(last as IFlipSettings).flipX;
             if ((last as IFlipSettings).flipX === false &&
               (last as IFlipSettings).flipY === false) {
               console.log('removeflip element');
@@ -568,7 +590,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         onClick={() => {
           let last = this.getLastManipulation();
           if (last && last.type === ManipulationType.Flip) {
-            (last as IFlipSettings).flipY = !(last as IFlipSettings).flipY
+            (last as IFlipSettings).flipY = !(last as IFlipSettings).flipY;
             if ((last as IFlipSettings).flipX === false &&
               (last as IFlipSettings).flipY === false) {
               this.removeLastManipulation();
@@ -581,7 +603,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }}
       />
 
-    </div>)
+    </div>);
   }
   private getRotateSettings(): JSX.Element {
     const lastvalue = this.getLastManipulation();
@@ -593,7 +615,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
       <div>
         {this.props.configsettings.rotateButtons.map((value: number, index: number) => {
           let icon: string = 'CompassNW';
-          if (value !== 0) { icon = 'Rotate' }
+          if (value !== 0) { icon = 'Rotate'; }
 
 
           return (<DefaultButton
@@ -689,7 +711,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     if (state && state.type === ManipulationType.Resize) {
       values = state as IResizeSettings;
     }
-    return values
+    return values;
   }
 
   private setResize(width: number, height: number): void {
@@ -712,9 +734,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     if (state && state.type === ManipulationType.Crop) {
       values = state as ICropSettings;
     }
-    return values
-
-
+    return values;
   }
 
   private setCrop(sx: number, sy: number, width: number, height: number): void {
