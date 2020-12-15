@@ -1,10 +1,12 @@
 # react-image-manipulation-spfx
 
-Settings Array
-undo and redo
-Reset Button
-resize ??? da muss das 100% weg
-internal setting statesync with external external no redo
+
+Order Histeroy PNP Order control
+ICONS
+Slider 0 bug !!!
+crop draw new rectangle
+resize Open
+
 
 ## Summary
 

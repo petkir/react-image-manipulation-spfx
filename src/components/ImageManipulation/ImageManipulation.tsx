@@ -203,9 +203,9 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
             this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
             this.manipulateCtx.save();
 
-            this.manipulateCtx.translate(this.canvasRef.width / 2, this.manipulateRef.height / 2);
+            this.manipulateCtx.translate(this.manipulateRef.width / 2, this.manipulateRef.height / 2);
             this.manipulateCtx.rotate(rotate.rotate * Math.PI / 180);
-            this.manipulateCtx.translate(this.canvasRef.width / 2 * -1, this.manipulateRef.height / 2 * -1);
+            this.manipulateCtx.translate(this.manipulateRef.width / 2 * -1, this.manipulateRef.height / 2 * -1);
 
             this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
             this.manipulateCtx.restore();
