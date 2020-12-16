@@ -2,7 +2,9 @@ import { noWrap } from 'office-ui-fabric-react';
 import { IPosition } from 'office-ui-fabric-react/lib-es2015/utilities/positioning';
 import * as React from 'react';
 import { ICrop } from '../ImageManipulation';
+import { nodePoition } from './Enums';
 import styles from './ImageCrop.module.scss';
+import { ICropData, IMousePosition } from './Interfaces';
 
 function clamp(num, min, max) {
   return Math.min(Math.max(num, min), max);
@@ -27,37 +29,9 @@ export interface IImageCropState {
   reloadtimestamp: string
 }
 
-export enum nodePoition {
-  NW,
-  N,
-  NE,
-  E,
-  SE,
-  S,
-  SW,
-  W
 
-}
 
-export interface IMousePosition {
-  x: number;
-  y: number;
-}
 
-export interface ICropData {
-  clientStartX: number;
-  clientStartY: number;
-  cropStartWidth: number;
-  cropStartHeight: number;
-  cropStartX: number;
-  cropStartY: number;
-  xInversed: boolean;
-  yInversed: boolean;
-  isResize: boolean;
-  pos?: nodePoition;
-  xDiff: number;
-  yDiff: number;
-};
 
 // Feature detection
 // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
@@ -358,7 +332,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   }
 
   private onDocMouseTouchEnd(e: MouseEvent | any): void {
-    const { crop, onDragEnd } = this.props;
+    const { crop, onDragEnd, onComplete } = this.props;
 
     let elecord = this.controlRef.getBoundingClientRect();
 
@@ -369,11 +343,11 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       if (onDragEnd) {
         onDragEnd(e);
       }
-      /*
-      onComplete(convertToPixelCrop(crop, width, height), convertToPercentCrop(crop, width, height));
-
+      if (onComplete) {
+        onComplete(crop);
+      }
       this.setState({ cropIsActive: false, newCropIsBeingDrawn: false });
-      */
+
     }
   }
 
@@ -418,7 +392,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     this.controlRef = element;
   }
 
-  private getClientPos(e) {
+  private getClientPos(e: MouseEvent | any): IMousePosition {
     let pageX;
     let pageY;
 

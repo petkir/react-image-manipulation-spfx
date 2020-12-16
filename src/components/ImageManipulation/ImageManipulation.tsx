@@ -49,6 +49,11 @@ export interface ICrop {
   height: number;
 }
 
+export interface IResize {
+  width: number;
+  height: number;
+}
+
 export interface ICropSettings extends IManipulationBase, ICrop {
 
 }
@@ -68,9 +73,8 @@ export interface IFilterSettings extends IManipulationBase {
   nvalue?: number;
   svalue?: string;
 }
-export interface IResizeSettings extends IManipulationBase {
-  width: number;
-  height: number;
+export interface IResizeSettings extends IManipulationBase,IResize {
+
 }
 
 export type IImageManipulationSettings = IFilterSettings | IRotateSettings | IScaleSettings | IFlipSettings | ICropSettings | IResizeSettings;
@@ -507,12 +511,13 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     const lastset = this.getLastManipulation() as IResizeSettings;
     if (lastset && lastset.type === ManipulationType.Resize) {
       return (<ImageGrid
-        left={0} top={0}
-        width={lastset.width} height={lastset.height} />);
+        width={lastset.width} height={lastset.height}
+        onChange={(size) => this.setResize(size.width,size.height)}
+        />);
     }
     return (<ImageGrid
-      left={80} top={80}
-      width={this.canvasRef.width - 160} height={this.canvasRef.height - 160} />);
+      onChange={(size) => this.setResize(size.width,size.height)}
+      width={this.canvasRef.width} height={this.canvasRef.height } />);
   }
 
   private getMaxWidth(): string {
