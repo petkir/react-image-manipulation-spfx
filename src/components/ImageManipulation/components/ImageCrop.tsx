@@ -13,14 +13,14 @@ function clamp(num, min, max) {
 
 export interface IImageCropProps {
   crop: ICrop;
-  aspect?: number;
+
   sourceHeight: number;
   sourceWidth: number;
   showRuler?: boolean
   onDragStart?: (e: MouseEvent) => void;
   onComplete?: (crop: ICrop) => void;
   onChange?: (crop: ICrop) => void;
-  onDragEnd: (e) => void;
+  onDragEnd?: (e) => void;
 }
 
 export interface IImageCropState {
@@ -277,7 +277,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       height: newSize.height,
     }
 
-    if (this.props.aspect || (pos === nodePoition.NW || pos === nodePoition.SE || pos === nodePoition.SW || pos === nodePoition.NE)) {
+    if (this.props.crop.aspect || (pos === nodePoition.NW || pos === nodePoition.SE || pos === nodePoition.SW || pos === nodePoition.NE)) {
       nextCrop.sx = containedCrop.sx;
       nextCrop.sy = containedCrop.sy;
       nextCrop.width = containedCrop.width;
@@ -294,7 +294,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
 
 
   private getNewSize(): { width: number, height: number } {
-    const { crop, sourceWidth, sourceHeight, aspect } = this.props;
+    const { crop, sourceWidth, sourceHeight } = this.props;
     const { evData } = this;
 
     let newWidth = evData.cropStartWidth + evData.xDiff;
@@ -308,8 +308,8 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     // New height.
     let newHeight;
 
-    if (aspect) {
-      newHeight = newWidth / aspect;
+    if (crop.aspect) {
+      newHeight = newWidth / crop.aspect;
     } else {
       newHeight = evData.cropStartHeight + evData.yDiff;
     }
@@ -321,8 +321,8 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
 
     newHeight = clamp(newHeight, 0, sourceHeight);
 
-    if (aspect) {
-      newWidth = clamp(newHeight * aspect, 0, sourceWidth);
+    if (crop.aspect) {
+      newWidth = clamp(newHeight * crop.aspect, 0, sourceWidth);
     }
 
     return {
@@ -413,34 +413,34 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   }
 
   private makeAspectCrop(crop: ICrop) {
-    if (isNaN(this.props.aspect)) {
+    if (isNaN(this.props.crop.aspect)) {
       return crop;
     }
 
     const calcCrop: ICrop = crop;
 
     if (crop.width) {
-      calcCrop.height = calcCrop.width / this.props.aspect;
+      calcCrop.height = calcCrop.width / this.props.crop.aspect;
     }
 
     if (crop.height) {
-      calcCrop.width = calcCrop.height * this.props.aspect;
+      calcCrop.width = calcCrop.height * this.props.crop.aspect;
     }
 
     if (calcCrop.sy + calcCrop.height > this.props.sourceHeight) {
       calcCrop.height = this.props.sourceHeight - calcCrop.sy;
-      calcCrop.width = calcCrop.height * this.props.aspect;
+      calcCrop.width = calcCrop.height * this.props.crop.aspect;
     }
 
     if (calcCrop.sx + calcCrop.width > this.props.sourceWidth) {
       calcCrop.width = this.props.sourceWidth - calcCrop.sx;
-      calcCrop.height = calcCrop.width / this.props.aspect;
+      calcCrop.height = calcCrop.width / this.props.crop.aspect;
     }
 
     return calcCrop;
   }
   private resolveCrop(pixelCrop: ICrop) {
-    if (this.props.aspect && (!pixelCrop.width || !pixelCrop.height)) {
+    if (this.props.crop.aspect && (!pixelCrop.width || !pixelCrop.height)) {
       return this.makeAspectCrop(pixelCrop);
     }
     return pixelCrop;

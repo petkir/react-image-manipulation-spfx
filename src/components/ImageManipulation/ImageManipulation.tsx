@@ -47,11 +47,13 @@ export interface ICrop {
   sy: number;
   width: number;
   height: number;
+  aspect?: number;
 }
 
 export interface IResize {
   width: number;
   height: number;
+  aspect?: number
 }
 
 export interface ICropSettings extends IManipulationBase, ICrop {
@@ -73,7 +75,7 @@ export interface IFilterSettings extends IManipulationBase {
   nvalue?: number;
   svalue?: string;
 }
-export interface IResizeSettings extends IManipulationBase,IResize {
+export interface IResizeSettings extends IManipulationBase, IResize {
 
 }
 
@@ -355,14 +357,14 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
 
   public render(): React.ReactElement<IImageManipulationProps> {
-//uE2B2
+    //uE2B2
     return (
       <div className={styles.imageEditor} >
         <div className={styles.commandBar}>
 
           <IconButton
             iconProps={{ iconName: 'SizeLegacy' }}
-            onRenderIcon={() =>{return (<i className='ms-Button-icon icon-125'>{'\uE74D'}</i>)}}
+            onRenderIcon={() => { return (<i className='ms-Button-icon icon-125'>{'\uE74D'}</i>) }}
             title='Resize'
             ariaLabel='Resize'
             onClick={() => this.openPanel(SettingPanelType.Resize)}
@@ -437,7 +439,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
             }}
           />
-         <IconButton
+          <IconButton
             iconProps={{ iconName: 'Delete' }}
             title='Reset'
             ariaLabel='Reset'
@@ -452,7 +454,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
             }}
           />
-            <IconButton
+          <IconButton
             iconProps={{ iconName: 'History' }}
             title='History'
             ariaLabel='History'
@@ -488,20 +490,17 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   private getCropGrid(): JSX.Element {
     const lastset = this.getLastManipulation() as ICropSettings;
     let lastdata: ICrop = { sx: 0, sy: 0, width: 0, height: 0 };
-    let isSet: boolean = false;
+
     if (lastset && lastset.type === ManipulationType.Crop) {
       lastdata = lastset;
     }
     return (<ImageCrop
       crop={lastdata}
-      aspect={undefined}
       showRuler
       sourceHeight={this.img.height}
       sourceWidth={this.img.width}
-      onDragEnd={(e) => { console.log(e); }}
-     // onComplete={(crop) => { this.setCrop(crop.sx, crop.sy, crop.width, crop.height); }}
       onChange={(crop) => {
-        this.setCrop(crop.sx, crop.sy, crop.width, crop.height);
+        this.setCrop(crop.sx, crop.sy, crop.width, crop.height, crop.aspect);
       }
       }
     />);
@@ -512,12 +511,14 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     if (lastset && lastset.type === ManipulationType.Resize) {
       return (<ImageGrid
         width={lastset.width} height={lastset.height}
-        onChange={(size) => this.setResize(size.width,size.height)}
-        />);
+        aspect={lastset.aspect}
+        onChange={(size) => this.setResize(size.width, size.height, lastset.aspect)}
+      />);
     }
     return (<ImageGrid
-      onChange={(size) => this.setResize(size.width,size.height)}
-      width={this.canvasRef.width} height={this.canvasRef.height } />);
+      onChange={(size) => this.setResize(size.width, size.height, undefined)}
+      //aspect={this.getAspect()}
+      width={this.canvasRef.width} height={this.canvasRef.height} />);
   }
 
   private getMaxWidth(): string {
@@ -550,7 +551,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         return "Trans_crop";
       case SettingPanelType.Resize:
         return "Trans_resize";
-        case SettingPanelType.History:
+      case SettingPanelType.History:
         return "History";
     }
   }
@@ -574,7 +575,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
       case SettingPanelType.Resize:
         return this.getResizeSettings();
 
-        case SettingPanelType.History:
+      case SettingPanelType.History:
         return this.getHistorySettings();
     }
   }
@@ -585,7 +586,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     });
   }
 
-  private getHistorySettings():JSX.Element {
+  private getHistorySettings(): JSX.Element {
     return (<div>PNP Order Item</div>);
   }
 
@@ -732,11 +733,23 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   private getCropSettings(): JSX.Element {
     let crop: ICropSettings = this.getCropValues();
     return (<div>
+      <Checkbox
+        label='LockAspect'
+        checked={!isNaN(crop.aspect)}
+        onChange={() => {
+          if (isNaN(crop.aspect)) {
+            this.setCrop(undefined, undefined, undefined, undefined, this.getAspect());
+          } else {
+            this.setCrop(undefined, undefined, undefined, undefined, undefined);
+          }
 
-      <TextField label="SourceX" value={'' + crop.sx} onChanged={(x) => this.setCrop(parseInt(x), undefined, undefined, undefined)} />
-      <TextField label="SourceY" value={'' + crop.sy} onChanged={(y) => this.setCrop(undefined, parseInt(y), undefined, undefined)} />
-      <TextField label="Width" value={'' + crop.width} onChanged={(w) => this.setCrop(undefined, undefined, parseInt(w), undefined)} />
-      <TextField label="Height" value={'' + crop.height} onChanged={(h) => this.setCrop(undefined, undefined, undefined, parseInt(h))} />
+        }}
+
+      />
+      <TextField label="SourceX" value={'' + crop.sx} onChanged={(x) => this.setCrop(parseInt(x), undefined, undefined, undefined, crop.aspect)} />
+      <TextField label="SourceY" value={'' + crop.sy} onChanged={(y) => this.setCrop(undefined, parseInt(y), undefined, undefined, crop.aspect)} />
+      <TextField label="Width" value={'' + crop.width} onChanged={(w) => this.setCrop(undefined, undefined, parseInt(w), undefined, crop.aspect)} />
+      <TextField label="Height" value={'' + crop.height} onChanged={(h) => this.setCrop(undefined, undefined, undefined, parseInt(h), crop.aspect)} />
 
     </div>);
   }
@@ -744,13 +757,29 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   private getResizeSettings(): JSX.Element {
     let resize: IResizeSettings = this.getResizeValues();
     return (<div>
-      Max Width 100% in display Mode
-      Lock Aspetct Todo
-      <TextField label="Width" value={'' + resize.width} onChanged={(w) => this.setResize(parseInt(w), undefined)} />
-      <TextField label="Height" value={'' + resize.height} onChanged={(h) => this.setResize(undefined, parseInt(h))} />
+
+      <Checkbox
+        label='LockAspect'
+        checked={!isNaN(resize.aspect)}
+        onChange={() => {
+          if (isNaN(resize.aspect)) {
+            this.setResize(undefined, undefined, this.getAspect());
+          } else {
+            this.setResize(undefined, undefined, undefined);
+          }
+
+        }}
+
+      />
+      <TextField label="Width" value={'' + resize.width} onChanged={(w) => this.setResize(parseInt(w), undefined, resize.aspect)} />
+      <TextField label="Height" value={'' + resize.height} onChanged={(h) => this.setResize(undefined, parseInt(h), resize.aspect)} />
 
     </div>);
   }
+  private getAspect(): number {
+    return this.canvasRef.width / this.canvasRef.height;
+  }
+
   private getScaleSettings(): JSX.Element {
     const lastvalue = this.getLastManipulation();
     let scalevalue = 1;
@@ -793,11 +822,11 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return values;
   }
 
-  private setResize(width: number, height: number): void {
-    let values = this.getResizeValues();
+  private setResize(width: number, height: number, aspect: number): void {
+    let values: IResizeSettings = this.getResizeValues();
     if (width) { values.width = width; }
     if (height) { values.height = height; }
-
+    values.aspect = aspect;
     this.addOrUpdateLastManipulation(values);
   }
 
@@ -816,13 +845,13 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return values;
   }
 
-  private setCrop(sx: number, sy: number, width: number, height: number): void {
+  private setCrop(sx: number, sy: number, width: number, height: number, aspect: number): void {
     let values = this.getCropValues();
     if (!isNaN(sx)) { values.sx = sx; }
     if (!isNaN(sy)) { values.sy = sy; }
     if (!isNaN(width)) { values.width = width; }
     if (!isNaN(height)) { values.height = height; }
-
+    values.aspect = aspect;
     this.addOrUpdateLastManipulation(values);
   }
 

@@ -142,7 +142,7 @@ export default class ImageGrid extends React.Component<IImageGridProps, IImageGr
   }
 
   private onDocMouseTouchMove(e: React.MouseEvent<HTMLDivElement> | any): void {
-    const { onChange } = this.props;
+    const { aspect ,onChange } = this.props;
     if (!this.dragStarted) {
       return;
     }
@@ -152,26 +152,32 @@ export default class ImageGrid extends React.Component<IImageGridProps, IImageGr
     e.preventDefault();
 
     const mousePos = this.getClientPos(e);
-    console.log('move');
-    console.log(mousePos.x);
-    console.log(this.evData.clientStartX);
-    let xDiff: number =0;
-    let yDiff: number =0;
-    if(this.evData.pos == nodePoition.E ||this.evData.pos == nodePoition.SE ||this.evData.pos == nodePoition.NE ) {
+
+    let xDiff: number = 0;
+    let yDiff: number = 0;
+
+    if (this.evData.pos == nodePoition.E || this.evData.pos == nodePoition.SE || this.evData.pos == nodePoition.NE) {
       xDiff = mousePos.x - this.evData.clientStartX;
-    } else if(this.evData.pos == nodePoition.W ||this.evData.pos == nodePoition.SW ||this.evData.pos == nodePoition.NW ) {
+    } else if (this.evData.pos == nodePoition.W || this.evData.pos == nodePoition.SW || this.evData.pos == nodePoition.NW) {
       xDiff = this.evData.clientStartX - mousePos.x;
     }
 
-    if(this.evData.pos == nodePoition.N ||this.evData.pos == nodePoition.NW ||this.evData.pos == nodePoition.NE ) {
-      yDiff =  this.evData.clientStartY-mousePos.y;
-    } else if(this.evData.pos == nodePoition.S ||this.evData.pos == nodePoition.SW ||this.evData.pos == nodePoition.SE ) {
+    if (this.evData.pos == nodePoition.N || this.evData.pos == nodePoition.NW || this.evData.pos == nodePoition.NE) {
+      yDiff = this.evData.clientStartY - mousePos.y;
+    } else if (this.evData.pos == nodePoition.S || this.evData.pos == nodePoition.SW || this.evData.pos == nodePoition.SE) {
       yDiff = mousePos.y - this.evData.clientStartY;
     }
 
-    const nextsize: IResize = {
+    let nextsize: IResize = {
       width: this.evData.width + xDiff,
       height: this.evData.height + yDiff
+    }
+    if(aspect) {
+      if(this.evData.pos !== nodePoition.N && this.evData.pos !== nodePoition.S) {
+        nextsize.height = nextsize.width / aspect;
+      } else {
+        nextsize.width = nextsize.height * aspect;
+      }
     }
     if (onChange) {
       onChange(nextsize);
