@@ -24,6 +24,7 @@ export interface IImageCropProps {
 export interface IImageCropState {
   cropIsActive: boolean;
   newCropIsBeingDrawn: boolean;
+  reloadtimestamp: string
 }
 
 export enum nodePoition {
@@ -50,10 +51,8 @@ export interface ICropData {
   cropStartHeight: number;
   cropStartX: number;
   cropStartY: number;
-  xCrossOver: boolean;
-  yCrossOver: boolean;
-  startXCrossOver: boolean;
-  startYCrossOver: boolean;
+  xInversed: boolean;
+  yInversed: boolean;
   isResize: boolean;
   pos?: nodePoition;
   xDiff: number;
@@ -76,12 +75,14 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     super(props);
     this.state = {
       cropIsActive: false,
-      newCropIsBeingDrawn: false
+      newCropIsBeingDrawn: false,
+      reloadtimestamp: ''
     };
     this.onDocMouseTouchMove = this.onDocMouseTouchMove.bind(this);
     this.onDocMouseTouchEnd = this.onDocMouseTouchEnd.bind(this);
     this.onCropMouseTouchDown = this.onCropMouseTouchDown.bind(this);
     this.setControlRef = this.setControlRef.bind(this);
+    this.onMouseTouchDown = this.onMouseTouchDown.bind(this);
   }
 
   public componentDidMount(): void {
@@ -92,6 +93,10 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     ) {
       console.log('componentDidMount');
       this.setState({ cropIsActive: true });
+    } else {
+      //Requireed because first renderer has no ref
+      this.setState({ reloadtimestamp: new Date().getTime().toString() });
+
     }
 
   }
@@ -107,6 +112,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     const { crop } = this.props;
     const { cropIsActive, newCropIsBeingDrawn } = this.state;
     const cropSelection = this.isValid(crop) && this.controlRef ? this.createSelectionGrid() : null;
+
     return (
       <div ref={this.setControlRef}
         className={styles.ImgGridShadowOverlay}
@@ -115,8 +121,8 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
         onMouseUp={this.onDocMouseTouchEnd}
         onTouchCancel={this.onDocMouseTouchEnd}
         onTouchEnd={this.onDocMouseTouchEnd}
-      //  onMouseDown={this.onCropMouseTouchDown}
-      //  onTouchStart={this.onCropMouseTouchDown}
+        onMouseDown={this.onMouseTouchDown}
+        onTouchStart={this.onMouseTouchDown}
       >
         <div className={styles.ImgGridVisible}
           style={
@@ -204,7 +210,6 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
 
   private onDocMouseTouchMove(e: React.MouseEvent<HTMLDivElement> | any): void {
     const { crop, onChange, onDragStart } = this.props;
-    // console.log(e);
     if (!this.mouseDownOnCrop) {
       return;
     }
@@ -269,55 +274,35 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     let nextCrop = this.makeNewCrop();
     const { pos } = evData;
 
-    console.log(pos);
-
-    // On the inverse change the diff so it's the same and
-    // the same algo applies.
-    if (evData.xCrossOver) {
-       evData.xDiff -= evData.cropStartWidth * 2;
+    if (evData.xInversed) {
+      evData.xDiff -= evData.cropStartWidth * 2;
 
     }
-    if (evData.yCrossOver) {
-        evData.yDiff -= evData.cropStartHeight * 2;
+    if (evData.yInversed) {
+      evData.yDiff -= evData.cropStartHeight * 2;
 
     }
-
-    // New size.
     const newSize = this.getNewSize();
 
 
     let newX = evData.cropStartX;
     let newY = evData.cropStartY;
 
-    if (evData.xCrossOver) {
+    if (evData.xInversed) {
       newX = nextCrop.sx + (nextCrop.width - newSize.width);
     }
 
-    if (evData.yCrossOver) {
-      // This not only removes the little "shake" when inverting at a diagonal, but for some
-      // reason y was way off at fast speeds moving sw->ne with fixed aspect only, I couldn't
-      // figure out why.
-      // if (evData.lastYCrossover === false) {
-     // newY = nextCrop.sy - newSize.height;
-      // } else {
-       newY = nextCrop.sy + (nextCrop.height - newSize.height);
-      // }
+    if (evData.yInversed) {
+      newY = nextCrop.sy + (nextCrop.height - newSize.height);
     }
 
     const containedCrop: ICrop = {
-
       sx: newX,
       sy: newY,
       width: newSize.width,
       height: newSize.height,
-
     }
 
-    console.log(containedCrop.width);
-    console.log(containedCrop.height);
-    // nextCrop=containedCrop;
-    // Apply x/y/width/height changes depending on ordinate (fixed aspect always applies both).
-    debugger;
     if (this.props.aspect || (pos === nodePoition.NW || pos === nodePoition.SE || pos === nodePoition.SW || pos === nodePoition.NE)) {
       nextCrop.sx = containedCrop.sx;
       nextCrop.sy = containedCrop.sy;
@@ -330,9 +315,6 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       nextCrop.sy = containedCrop.sy;
       nextCrop.height = containedCrop.height;
     }
-    /*evData.lastYCrossover = evData.yCrossOver;
-    this.crossOverCheck();
-*/
     return nextCrop;
   }
 
@@ -343,7 +325,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
 
     let newWidth = evData.cropStartWidth + evData.xDiff;
 
-    if (evData.xCrossOver) {
+    if (evData.xInversed) {
       newWidth = Math.abs(newWidth);
     }
 
@@ -358,7 +340,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       newHeight = evData.cropStartHeight + evData.yDiff;
     }
 
-    if (evData.yCrossOver) {
+    if (evData.yInversed) {
       // Cap if polarity is inversed and the height fills the y space.
       newHeight = Math.min(Math.abs(newHeight), evData.cropStartY);
     }
@@ -378,18 +360,15 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   private onDocMouseTouchEnd(e: MouseEvent | any): void {
     const { crop, onDragEnd } = this.props;
 
-
-    //debugger;
     let elecord = this.controlRef.getBoundingClientRect();
-    console.log(elecord);
+
 
     if (this.mouseDownOnCrop) {
       this.mouseDownOnCrop = false;
       this.dragStarted = false;
-
-      //      const { width, height } = this.mediaDimensions;
-
-      onDragEnd(e);
+      if (onDragEnd) {
+        onDragEnd(e);
+      }
       /*
       onComplete(convertToPixelCrop(crop, width, height), convertToPercentCrop(crop, width, height));
 
@@ -399,20 +378,14 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   }
 
   private onCropMouseTouchDown(e: MouseEvent | any): void {
+    console.log('onCropMouseTouchDown')
     const { crop } = this.props;
 
     e.preventDefault(); // Stop drag selection.
     const mousepos = this.getClientPos(e);
-
-    let refpos = this.controlRef.getBoundingClientRect()
-    let startx: number = refpos.left - mousepos.x;
-    let starty: number = refpos.top - mousepos.y;
-
-
     const { ord } = e.target.dataset;
 
     let xInversed: boolean = false;
-
     let yInversed: boolean = false;
     let pos: nodePoition = undefined;
     if (ord && !isNaN(+ord)) {
@@ -421,7 +394,6 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       yInversed = pos === nodePoition.NW || pos === nodePoition.N || pos === nodePoition.NE;
     }
 
-
     this.evData = {
       clientStartX: mousepos.x,
       clientStartY: mousepos.y,
@@ -429,10 +401,8 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       cropStartHeight: crop.height,
       cropStartX: xInversed ? crop.sx + crop.width : crop.sx,
       cropStartY: yInversed ? crop.sy + crop.height : crop.sy,
-      xCrossOver: xInversed,
-      yCrossOver: yInversed,
-      startXCrossOver: xInversed,
-      startYCrossOver: yInversed,
+      xInversed: xInversed,
+      yInversed: yInversed,
       isResize: (ord && !isNaN(ord)),
       pos: pos,
       xDiff: 0,
@@ -441,13 +411,11 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
 
     this.mouseDownOnCrop = true;
     this.setState({ cropIsActive: true });
-
   }
 
 
   private setControlRef(element: HTMLDivElement): void {
     this.controlRef = element;
-
   }
 
   private getClientPos(e) {
@@ -504,5 +472,53 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     return pixelCrop;
   }
 
+  private onMouseTouchDown(e: MouseEvent | any): void {
+
+    console.log('onMouseTouchDown')
+    const { crop, onChange } = this.props;
+    e.preventDefault(); // Stop drag selection.
+    const mousepos = this.getClientPos(e);
+
+    let refpos = this.controlRef.getBoundingClientRect()
+    let startx: number = mousepos.x - refpos.left;
+    let starty: number = mousepos.y - refpos.top;
+    //is mousePos in current pos
+    if (crop) {
+      if (crop.sx - 5 <= startx && crop.sx + crop.width + 5 >= startx &&
+        crop.sy - 5 <= starty && crop.sy + crop.height + 5 >= starty
+      ) {
+        //Position in current crop do Nothing
+        return;
+      }
+    }
+
+    const nextCrop: ICrop = {
+      sx: startx,
+      sy: starty,
+      width: 0,
+      height: 0,
+    };
+
+    this.evData = {
+      clientStartX: mousepos.x,
+      clientStartY: mousepos.y,
+      cropStartWidth: nextCrop.width,
+      cropStartHeight: nextCrop.height,
+      cropStartX: nextCrop.sx,
+      cropStartY: nextCrop.sy,
+      xInversed: false,
+      yInversed: false,
+      isResize: true,
+      xDiff: 0,
+      yDiff: 0,
+      pos: nodePoition.NW,
+    };
+
+    this.mouseDownOnCrop = true;
+
+    onChange(nextCrop);
+
+    this.setState({ cropIsActive: true, newCropIsBeingDrawn: true });
+  };
 
 }

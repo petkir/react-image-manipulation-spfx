@@ -277,7 +277,6 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
           break;
 
         case ManipulationType.Resize:
-          debugger
           const resize = element as IResizeSettings;
           this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
           this.manipulateCtx.save();
@@ -496,7 +495,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
       sourceHeight={this.img.height}
       sourceWidth={this.img.width}
       onDragEnd={(e) => { console.log(e); }}
-      onComplete={(crop) => { this.setCrop(crop.sx, crop.sy, crop.width, crop.height); }}
+     // onComplete={(crop) => { this.setCrop(crop.sx, crop.sy, crop.width, crop.height); }}
       onChange={(crop) => {
         this.setCrop(crop.sx, crop.sy, crop.width, crop.height);
       }
@@ -814,10 +813,10 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
   private setCrop(sx: number, sy: number, width: number, height: number): void {
     let values = this.getCropValues();
-    if (sx) { values.sx = sx; }
-    if (sy) { values.sy = sy; }
-    if (width) { values.width = width; }
-    if (height) { values.height = height; }
+    if (!isNaN(sx)) { values.sx = sx; }
+    if (!isNaN(sy)) { values.sy = sy; }
+    if (!isNaN(width)) { values.width = width; }
+    if (!isNaN(height)) { values.height = height; }
 
     this.addOrUpdateLastManipulation(values);
   }
