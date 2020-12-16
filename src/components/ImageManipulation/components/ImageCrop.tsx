@@ -152,6 +152,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   }
 
   private makeNewCrop(): ICrop {
+    console.log(this.props.crop.aspect ? 'aspect' : 'noaspect');
     const crop: ICrop = { ...{ sx: 0, sy: 0, height: 0, width: 0 }, ...this.props.crop };
     return crop;
   }
@@ -275,6 +276,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       sy: newY,
       width: newSize.width,
       height: newSize.height,
+      aspect: this.props.crop.aspect
     }
 
     if (this.props.crop.aspect || (pos === nodePoition.NW || pos === nodePoition.SE || pos === nodePoition.SW || pos === nodePoition.NE)) {
@@ -471,6 +473,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       sy: starty,
       width: 0,
       height: 0,
+      aspect: crop.aspect
     };
 
     this.evData = {
