@@ -3,8 +3,9 @@ import * as React from 'react';
 import { IImageSampleProps } from './IImageSampleProps';
 //import { escape } from '@microsoft/sp-lodash-subset';
 import ImageFocusPoint, { IFocusPoint } from '../../../components/ImageFocusPoint/ImageFocusPoint';
-import ImageManipulation, { IImageManipulationSettings } from '../../../components/ImageManipulation/ImageManipulation';
+import ImageManipulation from '../../../components/ImageManipulation/ImageManipulation';
 import { DisplayMode } from '@microsoft/sp-core-library';
+import { IImageManipulationSettings } from '../../../components/ImageManipulation/ManipulationType';
 
 
 export interface IImageSampleState {

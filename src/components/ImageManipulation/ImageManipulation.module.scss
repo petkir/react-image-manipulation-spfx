@@ -1,3 +1,18 @@
+
+
+.historyItem {
+  .historyItemText,
+  .historyItemIcon{
+padding-right: 6px;
+  }
+  .historyItemDetails{
+display: inline;
+  }
+  .historyItemSvg{
+    margin-bottom: -3px;
+    height: 20px;
+  }
+}
 .svgbutton {
   height: 20px;
 }

@@ -5,90 +5,22 @@ import * as React from 'react';
 
 import ImageCrop from './components/ImageCrop';
 import ImageGrid from './components/ImageGrid';
+import ItemOrder from './components/ItemOrder';
 
 import { GrayscaleFilter } from './Filter/GrayscaleFilter';
 import { SepiaFilter } from './Filter/SepiaFilter';
+import { historyItem } from './HistoryItem';
 import styles from './ImageManipulation.module.scss';
+import { FilterType, filterTypeData, ICrop, ICropSettings, IFilterSettings, IFlipSettings, IImageManipulationSettings, IManipulationTypeDataDetails, IResizeSettings, IRotateSettings, IScaleSettings, ManipulationType, manipulationTypeData, SettingPanelType } from './ManipulationType';
 
-const colorFilterIcon: any = require('../../svg/colorFilter.svg');
-const cropIcon: any = require('../../svg/crop.svg');
+
 const flipVerticalIcon: any = require('../../svg/flipVertical.svg');
 const flipHorizontalIcon: any = require('../../svg/flipHorizontal.svg');
-const focusIcon: any = require('../../svg/focus.svg');
-const resizeIcon: any = require('../../svg/resize.svg');
 
-export enum ManipulationType {
-  Crop,
-  Scale,
-  Rotate,
-  Flip,
-  Filter,
-  Resize
-}
-
-export enum FilterType {
-  Grayscale,
-  Sepia,
-  Blur,
-  Emboss,
-  Sepia2,
-  Invert,
-  Sharpen,
-  RemoteWhite,
-  Brightness,
-  Noise,
-  Pixelate,
-  ColorOverLay
-}
-
-export interface IManipulationBase {
-  type: ManipulationType;
-}
-
-export interface ICrop {
-  sx: number;
-  sy: number;
-  width: number;
-  height: number;
-  aspect?: number;
-}
-
-export interface IResize {
-  width: number;
-  height: number;
-  aspect?: number
-}
-
-export interface ICropSettings extends IManipulationBase, ICrop {
-
-}
-export interface IFlipSettings extends IManipulationBase {
-  flipX: boolean;
-  flipY: boolean;
-}
-export interface IScaleSettings extends IManipulationBase {
-  scale: number;
-}
-export interface IRotateSettings extends IManipulationBase {
-  rotate: number;
-}
-
-export interface IFilterSettings extends IManipulationBase {
-  filterType: FilterType;
-  nvalue?: number;
-  svalue?: string;
-}
-export interface IResizeSettings extends IManipulationBase, IResize {
-
-}
-
-export type IImageManipulationSettings = IFilterSettings | IRotateSettings | IScaleSettings | IFlipSettings | ICropSettings | IResizeSettings;
+import * as strings from 'ImageManipulationStrings';
 
 export interface IImageManipulationConfig {
   rotateButtons: number[];
-  //rotateShowReset:boolean;
-
-
 }
 
 export interface IImageManipulationProps {
@@ -97,18 +29,6 @@ export interface IImageManipulationProps {
   settingschanged?: (settings: IImageManipulationSettings[]) => void;
   configsettings: IImageManipulationConfig;
   displyMode: DisplayMode;
-}
-
-
-export enum SettingPanelType {
-  Closed = 1,
-  Filter = 2,
-  Flip = 3,
-  Rotate = 4,
-  Scale = 5,
-  Crop = 6,
-  Resize = 7,
-  History = 99
 }
 
 export interface IImageManipulationState {
@@ -173,7 +93,6 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
 
   }
   private applySettings(): void {
-    console.log('applySettings');
     this.bufferRef.width = this.img.width;
     this.bufferRef.height = this.img.height;
     this.bufferCtx.clearRect(0, 0, this.img.width, this.img.height);
@@ -187,7 +106,6 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
     this.props.settings.forEach((element, index) => {
       switch (element.type) {
         case ManipulationType.Flip:
-          console.log('Has Settings');
           const filp = element as IFlipSettings;
           this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
           this.manipulateCtx.save();
@@ -233,9 +151,6 @@ export default class ImageManipulation extends React.Component<IImageManipulatio
 
             let height = this.manipulateRef.height;
             let width = this.manipulateRef.width;
-            //this.canvasctx.translate(this.canvasRef.width / 2, this.canvasRef.height / 2);
-            // width = width * scale.scale;
-            // height = height * scale.scale;
             this.manipulateCtx.translate(width / 2, height / 2);
             this.manipulateCtx.scale(scale.scale, scale.scale);
             this.manipulateCtx.translate(width / 2 * -1, height / 2 * -1);
@@ -360,57 +275,20 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
 
   public render(): React.ReactElement<IImageManipulationProps> {
-    //uE2B2
     return (
       <div className={styles.imageEditor} >
         <div className={styles.commandBar}>
+          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Resize])}
+          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Crop])}
+          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Flip])}
+          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Rotate])}
+          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Scale])}
+          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Filter])}
 
-          <IconButton
-            iconProps={{ iconName: 'SizeLegacy' }}
-            onRenderIcon={() => { return (<img className={styles.svgbutton} src={resizeIcon} />) }}
-            title='Resize'
-            ariaLabel='Resize'
-            onClick={() => this.openPanel(SettingPanelType.Resize)}
-          />
-
-          <IconButton
-            iconProps={{ iconName: 'Picture' }}
-            onRenderIcon={() => { return (<img className={styles.svgbutton} src={cropIcon} />) }}
-            title='Crop'
-            ariaLabel='Crop'
-            onClick={() => this.openPanel(SettingPanelType.Crop)}
-          />
-          <IconButton
-            iconProps={{ iconName: 'SwitcherStartEnd' }}
-            onRenderIcon={() => { return (<img className={styles.svgbutton} src={flipVerticalIcon} />) }}
-            title='Flip'
-            ariaLabel='Flip'
-
-            onClick={() => this.openPanel(SettingPanelType.Flip)}
-          />
-          <IconButton
-            iconProps={{ iconName: 'Rotate' }}
-            title='Rotate'
-            ariaLabel='Rotate'
-            onClick={() => this.openPanel(SettingPanelType.Rotate)}
-          />
-          <IconButton
-            iconProps={{ iconName: 'Zoom' }}
-            title='Scale'
-            ariaLabel='Scale'
-            onClick={() => this.openPanel(SettingPanelType.Scale)}
-          />
-          <IconButton
-            iconProps={{ iconName: 'AutoEnhanceOff' }}
-            onRenderIcon={() => { return (<img className={styles.svgbutton} src={colorFilterIcon} />) }}
-            title='Filters'
-            ariaLabel='Filters'
-            onClick={() => this.openPanel(SettingPanelType.Filter)}
-          />
           <IconButton
             iconProps={{ iconName: 'Undo' }}
-            title='Undo'
-            ariaLabel='Undo'
+            title={strings.CommandBarUndo}
+            ariaLabel={strings.CommandBarUndo}
             disabled={!this.props.settings || this.props.settings.length < 1}
             onClick={() => {
               const settings = clone(this.props.settings)
@@ -428,8 +306,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           />
           <IconButton
             iconProps={{ iconName: 'Redo' }}
-            title='Redo'
-            ariaLabel='Redo'
+            title={strings.CommandBarRedo}
+            ariaLabel={strings.CommandBarRedo}
             disabled={!this.state.redosettings || this.state.redosettings.length < 1}
             onClick={() => {
               const redosettings = clone(this.state.redosettings)
@@ -447,8 +325,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           />
           <IconButton
             iconProps={{ iconName: 'Delete' }}
-            title='Reset'
-            ariaLabel='Reset'
+            title={strings.CommandBarReset}
+            ariaLabel={strings.CommandBarReset}
             disabled={!this.props.settings || this.props.settings.length < 1}
             onClick={() => {
               this.setState({ redosettings: [] },
@@ -462,8 +340,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           />
           <IconButton
             iconProps={{ iconName: 'History' }}
-            title='History'
-            ariaLabel='History'
+            title={strings.SettingPanelHistory}
+            ariaLabel={strings.SettingPanelHistory}
             onClick={() => this.openPanel(SettingPanelType.History)}
           />
           <Panel
@@ -471,7 +349,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
             type={PanelType.smallFixedFar}
             onDismiss={this.closeFilter}
             headerText={this.getPanelHeader(this.state.settingPanel)}
-            closeButtonAriaLabel='Close'
+            closeButtonAriaLabel={strings.SettingPanelClose}
             isBlocking={false}
             onRenderFooterContent={this.onRenderFooterContent}
           >
@@ -546,19 +424,19 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   private getPanelHeader(settingPanel: SettingPanelType): string {
     switch (settingPanel) {
       case SettingPanelType.Filter:
-        return "Trans_Filter";
+        return strings.ManipulationTypeFilter;
       case SettingPanelType.Flip:
-        return "Trans_Flip";
+        return strings.ManipulationTypeFlip;
       case SettingPanelType.Rotate:
-        return "Trans_Rotate";
+        return strings.ManipulationTypeRotate;
       case SettingPanelType.Scale:
-        return "Trans_scale";
+        return strings.ManipulationTypeScale;
       case SettingPanelType.Crop:
-        return "Trans_crop";
+        return strings.ManipulationTypeCrop;
       case SettingPanelType.Resize:
-        return "Trans_resize";
+        return strings.ManipulationTypeResize;
       case SettingPanelType.History:
-        return "History";
+        return strings.SettingPanelHistory;
     }
   }
   private onRenderFooterContent(): JSX.Element {
@@ -593,10 +471,48 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   }
 
   private getHistorySettings(): JSX.Element {
-    return (<div>PNP Order Item</div>);
+    return (<ItemOrder
+      label={''}
+      disabled={false}
+      moveUpIconName={'ChevronDownSmall'}
+      moveDownIconName={'ChevronUpSmall'}
+      disableDragAndDrop={false}
+      removeArrows={false}
+      items={this.props.settings}
+      valueChanged={(newhist) => {
+        if (this.state.redosettings && this.state.redosettings.length > 0) {
+          this.setState({ redosettings: [] }, () => {
+
+            if (this.props.settingschanged) {
+              this.props.settingschanged(newhist);
+            }
+          });
+        } else {
+
+          if (this.props.settingschanged) {
+            this.props.settingschanged(newhist);
+          }
+        }
+
+
+      }}
+      onRenderItem={historyItem}
+    />);
   }
 
   private getFilterSettings(): JSX.Element {
+    return (<div>
+      {
+        Object.keys(filterTypeData).map((key, index) => {
+          return (<Checkbox
+            key={'Filter' + index}
+            label={filterTypeData[key]}
+            checked={this.isFilterActive((+key) as FilterType)}
+            onChange={() => this.toggleFilter((+key) as FilterType)}
+          />);
+        })
+      }</div>);
+/*
     return (<div>
       <Checkbox
         label='Grayscale'
@@ -610,7 +526,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         onChange={() => this.toggleFilter(FilterType.Sepia)}
 
       />
-    </div>);
+    </div>);*/
   }
 
   private toggleFilter(type: FilterType, nvalue: number = undefined, svalue: string = undefined): void {
@@ -636,9 +552,9 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return (<div>
       <IconButton
         iconProps={{ iconName: 'SwitcherStartEnd' }}
-        onRenderIcon={() => { return (<img  className={styles.svgbutton} src={flipVerticalIcon}/>);}}
-        title='Flip X'
-        ariaLabel='Flip X'
+        onRenderIcon={() => { return (<img className={styles.svgbutton} src={flipVerticalIcon} />); }}
+        title={strings.FlipHorizontal}
+        ariaLabel={strings.FlipHorizontal}
         onClick={() => {
           console.log('flip x clicked');
           let last = this.getLastManipulation();
@@ -659,9 +575,9 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }}
       />
       <IconButton
-        onRenderIcon={() => { return (<img  className={styles.svgbutton} src={flipHorizontalIcon}/>);}}
-        title='Flip Y'
-        ariaLabel='Flip Y'
+        onRenderIcon={() => { return (<img className={styles.svgbutton} src={flipHorizontalIcon} />); }}
+        title={strings.FlipVertical}
+        ariaLabel={strings.FlipVertical}
         onClick={() => {
           let last = this.getLastManipulation();
           if (last && last.type === ManipulationType.Flip) {
@@ -923,5 +839,20 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         this.props.settingschanged(clone(state));
       }
     }
+  }
+
+  private getActionHeaderButton(options: IManipulationTypeDataDetails): JSX.Element {
+    return (<IconButton
+      iconProps={{ iconName: options.iconName }}
+      onRenderIcon={(p, defaultrenderer) => {
+        if (options.svgIcon) {
+          return (<img className={styles.svgbutton} src={options.svgIcon} />)
+        }
+        return defaultrenderer(p);
+      }}
+      title={options.text}
+      ariaLabel={options.text}
+      onClick={() => this.openPanel(options.settingPanelType)}
+    />);
   }
 }

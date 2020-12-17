@@ -13,6 +13,7 @@
   },
   "externals": {},
   "localizedResources": {
-    "ImageSampleWebPartStrings": "lib/webparts/imageSample/loc/{locale}.js"
+    "ImageSampleWebPartStrings": "lib/webparts/imageSample/loc/{locale}.js",
+    "ImageManipulationStrings": "lib/components/ImageManipulation/loc/{locale}.js",
   }
 }
