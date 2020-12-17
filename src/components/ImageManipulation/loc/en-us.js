@@ -1,8 +1,9 @@
-define([], function() {
+define([], function () {
   return {
     "ManipulationTypeFilter": "Filter",
     "ManipulationTypeFlip": "Flip",
-    "ManipulationTypeRotate": "Scale",
+    "ManipulationTypeRotate": "Rotate",
+    "ManipulationTypeScale": "Scale",
     "ManipulationTypeCrop": "Crop",
     "ManipulationTypeResize": "Resize",
 
@@ -19,5 +20,10 @@ define([], function() {
     "FlipVertical": "Vertical",
     "FlipHorizontal": "Horizontal",
 
+    "LockAspect": "Lock Aspect",
+    "Width": "Width",
+    "Height": "Height",
+    "SourceX": "SourceX",
+    "SourceY": "SourceY",
   }
 });

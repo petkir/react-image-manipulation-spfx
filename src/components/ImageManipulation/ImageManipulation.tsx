@@ -621,7 +621,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
       </div>
       <Slider
-        label='Rotate'
+        label=''
         min={-180}
         max={180}
         defaultValue={rotatevalue}
@@ -645,7 +645,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     let crop: ICropSettings = this.getCropValues();
     return (<div>
       <Checkbox
-        label='LockAspect'
+        label={strings.LockAspect}
         checked={!isNaN(crop.aspect)}
         onChange={() => {
           if (isNaN(crop.aspect)) {
@@ -657,10 +657,10 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }}
 
       />
-      <TextField label="SourceX" value={'' + crop.sx} onChanged={(x) => this.setCrop(parseInt(x), undefined, undefined, undefined, crop.aspect)} />
-      <TextField label="SourceY" value={'' + crop.sy} onChanged={(y) => this.setCrop(undefined, parseInt(y), undefined, undefined, crop.aspect)} />
-      <TextField label="Width" value={'' + crop.width} onChanged={(w) => this.setCrop(undefined, undefined, parseInt(w), undefined, crop.aspect)} />
-      <TextField label="Height" value={'' + crop.height} onChanged={(h) => this.setCrop(undefined, undefined, undefined, parseInt(h), crop.aspect)} />
+      <TextField label={strings.SourceX}  value={'' + crop.sx} onChanged={(x) => this.setCrop(parseInt(x), undefined, undefined, undefined, crop.aspect)} />
+      <TextField label={strings.SourceY}  value={'' + crop.sy} onChanged={(y) => this.setCrop(undefined, parseInt(y), undefined, undefined, crop.aspect)} />
+      <TextField label={strings.Width} value={'' + crop.width} onChanged={(w) => this.setCrop(undefined, undefined, parseInt(w), undefined, crop.aspect)} />
+      <TextField label={strings.Height} value={'' + crop.height} onChanged={(h) => this.setCrop(undefined, undefined, undefined, parseInt(h), crop.aspect)} />
 
     </div>);
   }
@@ -670,7 +670,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return (<div>
 
       <Checkbox
-        label='LockAspect'
+        label={strings.LockAspect}
         checked={!isNaN(resize.aspect)}
         onChange={() => {
           if (isNaN(resize.aspect)) {
@@ -682,8 +682,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }}
 
       />
-      <TextField label="Width" value={'' + resize.width} onChanged={(w) => this.setResize(parseInt(w), undefined, resize.aspect)} />
-      <TextField label="Height" value={'' + resize.height} onChanged={(h) => this.setResize(undefined, parseInt(h), resize.aspect)} />
+      <TextField label={strings.Width} value={'' + resize.width} onChanged={(w) => this.setResize(parseInt(w), undefined, resize.aspect)} />
+      <TextField label={strings.Height} value={'' + resize.height} onChanged={(h) => this.setResize(undefined, parseInt(h), resize.aspect)} />
 
     </div>);
   }
@@ -700,7 +700,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return (<div>
 
       <Slider
-        label='Scale'
+        label=''
         min={0.1}
         max={5}
         step={0.1}
