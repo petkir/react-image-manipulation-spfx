@@ -1,10 +1,13 @@
 # react-image-manipulation-spfx
 
 
+Bugs:
+ASpect loc durring entry Crop and Scale
 
-Slider 0 bug !!!
+Impovements:
+Rotate switch size to max x maxy (Edge cutting)
 
-Add external Interfaces into Index.ts for ImageManipulation 
+Missing Features:
 ImageFocus Point missiong
 
 

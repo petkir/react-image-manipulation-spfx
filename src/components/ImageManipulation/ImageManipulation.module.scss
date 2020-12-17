@@ -19,7 +19,9 @@ display: inline;
 .imageEditor{
   width: 100%;
   .commandBar{
-    display: block;
+    button {
+      background-color: lightgray;
+    }
 
   }
   .imageplaceholder{

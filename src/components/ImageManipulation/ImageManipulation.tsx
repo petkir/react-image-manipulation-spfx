@@ -1,6 +1,6 @@
 import { DisplayMode } from '@microsoft/sp-core-library';
 import { clone } from '@microsoft/sp-lodash-subset';
-import { ActionButton, Checkbox, DefaultButton, findIndex, Icon, IconButton, IsFocusVisibleClassName, ISlider, Panel, PanelType, Slider, TextField } from 'office-ui-fabric-react';
+import { Checkbox, DefaultButton, findIndex, Icon, IconButton, IsFocusVisibleClassName, ISlider, Panel, PanelType, Slider, TextField } from 'office-ui-fabric-react';
 import * as React from 'react';
 
 import ImageCrop from './components/ImageCrop';
@@ -739,12 +739,21 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
     if (state.length > 0 && state[state.length - 1].type === changed.type) {
       state[state.length - 1] = changed
+
     } else {
       state.push(changed);
-    }
 
-    if (this.props.settingschanged) {
-      this.props.settingschanged(state);
+    }
+    if (this.state.redosettings && this.state.redosettings.length > 0) {
+      this.setState({ redosettings: [] }, () => {
+        if (this.props.settingschanged) {
+          this.props.settingschanged(state);
+        }
+      });
+    } else {
+      if (this.props.settingschanged) {
+        this.props.settingschanged(state);
+      }
     }
   }
 
