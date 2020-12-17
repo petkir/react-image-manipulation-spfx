@@ -1,6 +1,6 @@
 import { Overlay } from 'office-ui-fabric-react';
 import * as React from 'react';
-import { IResize } from '../ManipulationType';
+import { IResize } from '../ImageManipulation.types';
 
 import { nodePoition } from './Enums';
 import styles from './ImageGrid.module.scss';

@@ -2,7 +2,7 @@ import { Icon } from 'office-ui-fabric-react';
 import * as React from 'react';
 import styles from './ImageManipulation.module.scss';
 
-import { IImageManipulationSettings, manipulationTypeData } from './ManipulationType';
+import { IImageManipulationSettings, manipulationTypeData } from './ImageManipulation.types';
 
 export const historyItem = (item:IImageManipulationSettings, index:number): JSX.Element => {
   if(!item) {

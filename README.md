@@ -1,11 +1,11 @@
 # react-image-manipulation-spfx
 
 
-Order Histeroy PNP Order control
-ICONS
+
 Slider 0 bug !!!
-crop draw new rectangle
-resize Open
+
+Add external Interfaces into Index.ts for ImageManipulation 
+ImageFocus Point missiong
 
 
 ## Summary

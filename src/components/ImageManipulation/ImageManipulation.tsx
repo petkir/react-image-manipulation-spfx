@@ -1,6 +1,6 @@
 import { DisplayMode } from '@microsoft/sp-core-library';
 import { clone } from '@microsoft/sp-lodash-subset';
-import { ActionButton, Checkbox, DefaultButton, findIndex, Icon, IconButton, IsFocusVisibleClassName, Panel, PanelType, Slider, TextField } from 'office-ui-fabric-react';
+import { ActionButton, Checkbox, DefaultButton, findIndex, Icon, IconButton, IsFocusVisibleClassName, ISlider, Panel, PanelType, Slider, TextField } from 'office-ui-fabric-react';
 import * as React from 'react';
 
 import ImageCrop from './components/ImageCrop';
@@ -11,7 +11,7 @@ import { GrayscaleFilter } from './Filter/GrayscaleFilter';
 import { SepiaFilter } from './Filter/SepiaFilter';
 import { historyItem } from './HistoryItem';
 import styles from './ImageManipulation.module.scss';
-import { FilterType, filterTypeData, ICrop, ICropSettings, IFilterSettings, IFlipSettings, IImageManipulationSettings, IManipulationTypeDataDetails, IResizeSettings, IRotateSettings, IScaleSettings, ManipulationType, manipulationTypeData, SettingPanelType } from './ManipulationType';
+import { FilterType, filterTypeData, ICrop, ICropSettings, IFilterSettings, IFlipSettings, IImageManipulationSettings, IManipulationTypeDataDetails, IResizeSettings, IRotateSettings, IScaleSettings, ManipulationType, manipulationTypeData, SettingPanelType } from './ImageManipulation.types';
 
 
 const flipVerticalIcon: any = require('../../svg/flipVertical.svg');
@@ -36,7 +36,7 @@ export interface IImageManipulationState {
   redosettings: IImageManipulationSettings[];
 }
 
-export default class ImageManipulation extends React.Component<IImageManipulationProps, IImageManipulationState> {
+export class ImageManipulation extends React.Component<IImageManipulationProps, IImageManipulationState> {
   private img: HTMLImageElement = null;
   private wrapperRef: HTMLDivElement = null;
   private bufferRef: HTMLCanvasElement = null;
@@ -277,85 +277,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   public render(): React.ReactElement<IImageManipulationProps> {
     return (
       <div className={styles.imageEditor} >
-        <div className={styles.commandBar}>
-          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Resize])}
-          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Crop])}
-          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Flip])}
-          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Rotate])}
-          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Scale])}
-          {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Filter])}
-
-          <IconButton
-            iconProps={{ iconName: 'Undo' }}
-            title={strings.CommandBarUndo}
-            ariaLabel={strings.CommandBarUndo}
-            disabled={!this.props.settings || this.props.settings.length < 1}
-            onClick={() => {
-              const settings = clone(this.props.settings)
-              const last = settings.pop();
-              const redo = clone(this.state.redosettings);
-              redo.push(last);
-              this.setState({ redosettings: redo },
-                () => {
-                  if (this.props.settingschanged) {
-                    this.props.settingschanged(settings);
-                  }
-                });
-
-            }}
-          />
-          <IconButton
-            iconProps={{ iconName: 'Redo' }}
-            title={strings.CommandBarRedo}
-            ariaLabel={strings.CommandBarRedo}
-            disabled={!this.state.redosettings || this.state.redosettings.length < 1}
-            onClick={() => {
-              const redosettings = clone(this.state.redosettings)
-              const redo = redosettings.pop();
-              const settings = clone(this.props.settings);
-              settings.push(redo);
-              this.setState({ redosettings: redosettings },
-                () => {
-                  if (this.props.settingschanged) {
-                    this.props.settingschanged(settings);
-                  }
-                });
-
-            }}
-          />
-          <IconButton
-            iconProps={{ iconName: 'Delete' }}
-            title={strings.CommandBarReset}
-            ariaLabel={strings.CommandBarReset}
-            disabled={!this.props.settings || this.props.settings.length < 1}
-            onClick={() => {
-              this.setState({ redosettings: [] },
-                () => {
-                  if (this.props.settingschanged) {
-                    this.props.settingschanged([]);
-                  }
-                });
-
-            }}
-          />
-          <IconButton
-            iconProps={{ iconName: 'History' }}
-            title={strings.SettingPanelHistory}
-            ariaLabel={strings.SettingPanelHistory}
-            onClick={() => this.openPanel(SettingPanelType.History)}
-          />
-          <Panel
-            isOpen={this.state.settingPanel != SettingPanelType.Closed}
-            type={PanelType.smallFixedFar}
-            onDismiss={this.closeFilter}
-            headerText={this.getPanelHeader(this.state.settingPanel)}
-            closeButtonAriaLabel={strings.SettingPanelClose}
-            isBlocking={false}
-            onRenderFooterContent={this.onRenderFooterContent}
-          >
-            {this.renderPanelContent()}
-          </Panel>
-        </div>
+        {this.props.displyMode === DisplayMode.Edit && this.getCommandBar()}
         <div className={styles.imageplaceholder + ' ' + this.getMaxWidth()}
           ref={(element: HTMLDivElement) => { this.wrapperRef = element }}
           style={this.canvasRef && { width: '' + this.canvasRef.width + 'px' }}
@@ -512,21 +434,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           />);
         })
       }</div>);
-/*
-    return (<div>
-      <Checkbox
-        label='Grayscale'
-        checked={this.isFilterActive(FilterType.Grayscale)}
-        onChange={() => this.toggleFilter(FilterType.Grayscale)}
 
-      />
-      <Checkbox
-        label='Sepia'
-        checked={this.isFilterActive(FilterType.Sepia)}
-        onChange={() => this.toggleFilter(FilterType.Sepia)}
-
-      />
-    </div>);*/
   }
 
   private toggleFilter(type: FilterType, nvalue: number = undefined, svalue: string = undefined): void {
@@ -602,6 +510,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     if (lastvalue && lastvalue.type === ManipulationType.Rotate) {
       rotatevalue = (lastvalue as IRotateSettings).rotate ? (lastvalue as IRotateSettings).rotate : 0;
     }
+    console.log('RotateValue: ' + rotatevalue);
     return (<div>
       <div>
         {this.props.configsettings.rotateButtons.map((value: number, index: number) => {
@@ -624,20 +533,28 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         label=''
         min={-180}
         max={180}
-        defaultValue={rotatevalue}
+
         value={rotatevalue}
         onChange={this.setRotate}
         showValue={true}
+        componentRef={(component: ISlider | null) => {
+          //Initial Value has a bug 0 is min value only min value is negative
+          const correctBugComponent = component as any;
+          if (correctBugComponent && correctBugComponent.state && correctBugComponent.value != correctBugComponent.props.value) {
+            correctBugComponent.setState({ value: 0, renderedValue: 0 });
+          }
+
+        }}
       //originFromZero
       />
-      <ActionButton
+      <IconButton
         key={'resetrotate'}
         disabled={!(lastvalue && lastvalue.type === ManipulationType.Rotate)}
         iconProps={{ iconName: 'Undo' }}
-        ariaLabel={'reset'}
+        ariaLabel={strings.CommandBarReset}
         onClick={() => { this.removeLastManipulation() }
         }
-      >{'reset'} </ActionButton>
+      />
     </div >);
   }
 
@@ -657,8 +574,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }}
 
       />
-      <TextField label={strings.SourceX}  value={'' + crop.sx} onChanged={(x) => this.setCrop(parseInt(x), undefined, undefined, undefined, crop.aspect)} />
-      <TextField label={strings.SourceY}  value={'' + crop.sy} onChanged={(y) => this.setCrop(undefined, parseInt(y), undefined, undefined, crop.aspect)} />
+      <TextField label={strings.SourceX} value={'' + crop.sx} onChanged={(x) => this.setCrop(parseInt(x), undefined, undefined, undefined, crop.aspect)} />
+      <TextField label={strings.SourceY} value={'' + crop.sy} onChanged={(y) => this.setCrop(undefined, parseInt(y), undefined, undefined, crop.aspect)} />
       <TextField label={strings.Width} value={'' + crop.width} onChanged={(w) => this.setCrop(undefined, undefined, parseInt(w), undefined, crop.aspect)} />
       <TextField label={strings.Height} value={'' + crop.height} onChanged={(h) => this.setCrop(undefined, undefined, undefined, parseInt(h), crop.aspect)} />
 
@@ -712,8 +629,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         key={'resetscale'}
         disabled={!(lastvalue && lastvalue.type === ManipulationType.Scale)}
         iconProps={{ iconName: 'Undo' }}
-        title={'reset'}
-        ariaLabel={'reset'}
+        title={strings.CommandBarReset}
+        ariaLabel={strings.CommandBarReset}
         onClick={() => { this.setScale(1) }
         }
       />
@@ -854,5 +771,88 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
       ariaLabel={options.text}
       onClick={() => this.openPanel(options.settingPanelType)}
     />);
+  }
+
+  private getCommandBar(): JSX.Element {
+    return (<div className={styles.commandBar}>
+      {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Resize])}
+      {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Crop])}
+      {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Flip])}
+      {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Rotate])}
+      {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Scale])}
+      {this.getActionHeaderButton(manipulationTypeData[ManipulationType.Filter])}
+
+      <IconButton
+        iconProps={{ iconName: 'Undo' }}
+        title={strings.CommandBarUndo}
+        ariaLabel={strings.CommandBarUndo}
+        disabled={!this.props.settings || this.props.settings.length < 1}
+        onClick={() => {
+          const settings = clone(this.props.settings)
+          const last = settings.pop();
+          const redo = clone(this.state.redosettings);
+          redo.push(last);
+          this.setState({ redosettings: redo },
+            () => {
+              if (this.props.settingschanged) {
+                this.props.settingschanged(settings);
+              }
+            });
+
+        }}
+      />
+      <IconButton
+        iconProps={{ iconName: 'Redo' }}
+        title={strings.CommandBarRedo}
+        ariaLabel={strings.CommandBarRedo}
+        disabled={!this.state.redosettings || this.state.redosettings.length < 1}
+        onClick={() => {
+          const redosettings = clone(this.state.redosettings)
+          const redo = redosettings.pop();
+          const settings = clone(this.props.settings);
+          settings.push(redo);
+          this.setState({ redosettings: redosettings },
+            () => {
+              if (this.props.settingschanged) {
+                this.props.settingschanged(settings);
+              }
+            });
+
+        }}
+      />
+      <IconButton
+        iconProps={{ iconName: 'Delete' }}
+        title={strings.CommandBarReset}
+        ariaLabel={strings.CommandBarReset}
+        disabled={!this.props.settings || this.props.settings.length < 1}
+        onClick={() => {
+          this.setState({ redosettings: [] },
+            () => {
+              if (this.props.settingschanged) {
+                this.props.settingschanged([]);
+              }
+            });
+
+        }}
+      />
+      <IconButton
+        iconProps={{ iconName: 'History' }}
+        title={strings.SettingPanelHistory}
+        ariaLabel={strings.SettingPanelHistory}
+        disabled={!this.props.settings || this.props.settings.length < 1}
+        onClick={() => this.openPanel(SettingPanelType.History)}
+      />
+      <Panel
+        isOpen={this.state.settingPanel != SettingPanelType.Closed}
+        type={PanelType.smallFixedFar}
+        onDismiss={this.closeFilter}
+        headerText={this.getPanelHeader(this.state.settingPanel)}
+        closeButtonAriaLabel={strings.SettingPanelClose}
+        isBlocking={false}
+        onRenderFooterContent={this.onRenderFooterContent}
+      >
+        {this.renderPanelContent()}
+      </Panel>
+    </div>);
   }
 }

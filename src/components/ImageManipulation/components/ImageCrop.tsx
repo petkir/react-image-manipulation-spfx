@@ -1,7 +1,7 @@
 import { noWrap } from 'office-ui-fabric-react';
 import { IPosition } from 'office-ui-fabric-react/lib-es2015/utilities/positioning';
 import * as React from 'react';
-import { ICrop } from '../ManipulationType';
+import { ICrop } from '../ImageManipulation.types';
 
 import { nodePoition } from './Enums';
 import styles from './ImageCrop.module.scss';
