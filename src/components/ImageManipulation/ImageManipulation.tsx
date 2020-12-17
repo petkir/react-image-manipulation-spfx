@@ -1,9 +1,6 @@
 import { DisplayMode } from '@microsoft/sp-core-library';
 import { clone } from '@microsoft/sp-lodash-subset';
-import { ManifestType } from '@microsoft/sp-module-interfaces';
 import { ActionButton, Checkbox, DefaultButton, findIndex, Icon, IconButton, IsFocusVisibleClassName, Panel, PanelType, Slider, TextField } from 'office-ui-fabric-react';
-import { getStyles } from 'office-ui-fabric-react/lib-es2015/components/Breadcrumb/Breadcrumb.styles';
-import { resultContent } from 'office-ui-fabric-react/lib-es2015/components/ExtendedPicker/PeoplePicker/ExtendedPeoplePicker.scss';
 import * as React from 'react';
 
 import ImageCrop from './components/ImageCrop';
@@ -13,6 +10,12 @@ import { GrayscaleFilter } from './Filter/GrayscaleFilter';
 import { SepiaFilter } from './Filter/SepiaFilter';
 import styles from './ImageManipulation.module.scss';
 
+const colorFilterIcon: any = require('../../svg/colorFilter.svg');
+const cropIcon: any = require('../../svg/crop.svg');
+const flipVerticalIcon: any = require('../../svg/flipVertical.svg');
+const flipHorizontalIcon: any = require('../../svg/flipHorizontal.svg');
+const focusIcon: any = require('../../svg/focus.svg');
+const resizeIcon: any = require('../../svg/resize.svg');
 
 export enum ManipulationType {
   Crop,
@@ -364,7 +367,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
           <IconButton
             iconProps={{ iconName: 'SizeLegacy' }}
-            onRenderIcon={() => { return (<i className='ms-Button-icon icon-125'>{'\uE74D'}</i>) }}
+            onRenderIcon={() => { return (<img className={styles.svgbutton} src={resizeIcon} />) }}
             title='Resize'
             ariaLabel='Resize'
             onClick={() => this.openPanel(SettingPanelType.Resize)}
@@ -372,12 +375,14 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
           <IconButton
             iconProps={{ iconName: 'Picture' }}
+            onRenderIcon={() => { return (<img className={styles.svgbutton} src={cropIcon} />) }}
             title='Crop'
             ariaLabel='Crop'
             onClick={() => this.openPanel(SettingPanelType.Crop)}
           />
           <IconButton
             iconProps={{ iconName: 'SwitcherStartEnd' }}
+            onRenderIcon={() => { return (<img className={styles.svgbutton} src={flipVerticalIcon} />) }}
             title='Flip'
             ariaLabel='Flip'
 
@@ -397,6 +402,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           />
           <IconButton
             iconProps={{ iconName: 'AutoEnhanceOff' }}
+            onRenderIcon={() => { return (<img className={styles.svgbutton} src={colorFilterIcon} />) }}
             title='Filters'
             ariaLabel='Filters'
             onClick={() => this.openPanel(SettingPanelType.Filter)}
@@ -630,16 +636,9 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return (<div>
       <IconButton
         iconProps={{ iconName: 'SwitcherStartEnd' }}
+        onRenderIcon={() => { return (<img  className={styles.svgbutton} src={flipVerticalIcon}/>);}}
         title='Flip X'
         ariaLabel='Flip X'
-        styles={{
-          root: [
-            {
-              transform: 'rotate(-90deg)',
-
-            }
-          ]
-        }}
         onClick={() => {
           console.log('flip x clicked');
           let last = this.getLastManipulation();
@@ -660,11 +659,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }}
       />
       <IconButton
-        iconProps={{
-          iconName: 'SwitcherStartEnd',
-
-        }}
-
+        onRenderIcon={() => { return (<img  className={styles.svgbutton} src={flipHorizontalIcon}/>);}}
         title='Flip Y'
         ariaLabel='Flip Y'
         onClick={() => {
