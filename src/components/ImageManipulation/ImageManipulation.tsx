@@ -129,16 +129,43 @@ export class ImageManipulation extends React.Component<IImageManipulationProps, 
           if (rotate.rotate) {
             this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
             this.manipulateCtx.save();
+            const angelcalc = rotate.rotate * Math.PI / 180;
+            const oldwidth = this.manipulateRef.width;
+            const oldheight = this.manipulateRef.height;
+            let newwidth = this.manipulateRef.width;
+            let newheight = this.manipulateRef.height;
+            let offsetwidth = 0;
+            let offsetheight = 0;
 
-            this.manipulateCtx.translate(this.manipulateRef.width / 2, this.manipulateRef.height / 2);
-            this.manipulateCtx.rotate(rotate.rotate * Math.PI / 180);
-            this.manipulateCtx.translate(this.manipulateRef.width / 2 * -1, this.manipulateRef.height / 2 * -1);
+              var a = oldwidth * Math.abs(Math.cos(angelcalc));
+              var b = oldheight * Math.abs(Math.sin(angelcalc));
 
-            this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
+              var p = oldwidth * Math.abs(Math.sin(angelcalc));
+              var q = oldheight * Math.abs(Math.cos(angelcalc));
+              newwidth = a + b;
+              newheight = p + q;
+
+              offsetwidth = (newwidth - oldwidth  ) / 2;
+              offsetheight =(newheight - oldheight) / 2;
+
+
+            this.manipulateRef.width = newwidth;
+            this.manipulateRef.height = newheight;
+
+            this.manipulateCtx.translate(newwidth / 2, newheight / 2);
+            this.manipulateCtx.rotate(angelcalc);
+            this.manipulateCtx.translate(newwidth / 2 * -1, newheight / 2 * -1);
+
+
+
+            this.manipulateCtx.drawImage(this.bufferRef, offsetwidth, offsetheight);
             this.manipulateCtx.restore();
 
+            this.bufferRef.width = newwidth;
+            this.bufferRef.height = newheight;
+
             this.bufferCtx.restore();
-            this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
+            this.bufferCtx.clearRect(0, 0, newwidth, newheight);
             this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
             this.bufferCtx.save();
           }
