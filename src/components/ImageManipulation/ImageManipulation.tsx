@@ -423,8 +423,8 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return (<ItemOrder
       label={''}
       disabled={false}
-      moveUpIconName={'ChevronDownSmall'}
-      moveDownIconName={'ChevronUpSmall'}
+      moveUpIconName={'ChevronUpSmall'}
+      moveDownIconName={'ChevronDownSmall'}
       disableDragAndDrop={false}
       removeArrows={false}
       items={this.props.settings}
