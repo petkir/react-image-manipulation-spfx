@@ -13,16 +13,26 @@ display: inline;
     height: 20px;
   }
 }
-.svgbutton {
-  height: 20px;
+.svgbuttonPanel {
+  height: 40px;
 }
+.buttonHolderPanel {
+ &>button {
+    margin-right: 30px;
+  }
+
+}
+
+
 .imageEditor{
   width: 100%;
   .commandBar{
     button {
       background-color: lightgray;
     }
-
+    .svgbutton {
+      height: 20px;
+    }
   }
   .imageplaceholder{
     position: relative;

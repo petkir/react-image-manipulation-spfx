@@ -484,10 +484,10 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   }
 
   private getFlipSettings(): JSX.Element {
-    return (<div>
+    return (<div className={styles.buttonHolderPanel}  >
       <IconButton
         iconProps={{ iconName: 'SwitcherStartEnd' }}
-        onRenderIcon={() => { return (<img className={styles.svgbutton} src={flipVerticalIcon} />); }}
+        onRenderIcon={() => { return (<img className={styles.svgbuttonPanel} src={flipVerticalIcon} />); }}
         title={strings.FlipHorizontal}
         ariaLabel={strings.FlipHorizontal}
         onClick={() => {
@@ -510,7 +510,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         }}
       />
       <IconButton
-        onRenderIcon={() => { return (<img className={styles.svgbutton} src={flipHorizontalIcon} />); }}
+        onRenderIcon={() => { return (<img className={styles.svgbuttonPanel} src={flipHorizontalIcon} />); }}
         title={strings.FlipVertical}
         ariaLabel={strings.FlipVertical}
         onClick={() => {
@@ -547,7 +547,12 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
           return (<DefaultButton
             key={'rotate' + index}
-            onClick={() => { this.calcRotate(value) }}
+            onClick={() => { if(value === 0) {
+              this.setRotate(value)
+            } else {
+              this.calcRotate(value)
+            }
+             }}
             className={styles.iconbtn}
           >
             <Icon iconName={icon} style={value < 0 ? { transform: 'scaleX(-1)' } : {}} className={styles.imgicon} />

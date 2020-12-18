@@ -3,8 +3,6 @@ import * as React from 'react';
 const colorFilterIcon: any = require('../../svg/colorFilter.svg');
 const cropIcon: any = require('../../svg/crop.svg');
 const flipVerticalIcon: any = require('../../svg/flipVertical.svg');
-const flipHorizontalIcon: any = require('../../svg/flipHorizontal.svg');
-const focusIcon: any = require('../../svg/focus.svg');
 const resizeIcon: any = require('../../svg/resize.svg');
 import * as strings from 'ImageManipulationStrings';
 
