@@ -82,72 +82,71 @@ export class ImageManipulation extends React.Component<IImageManipulationProps, 
     this.img.crossOrigin = "Anonymous";
     this.img.onload = () => {
       this.img = this.img;
-      this.canvasRef.width = this.img.width;
-      this.canvasRef.height = this.img.height;
-      this.bufferRef.width = this.img.width;
-      this.bufferRef.height = this.img.height;
-      this.manipulateRef.width = this.img.width;
-      this.manipulateRef.height = this.img.height;
+
+
       this.applySettings();
     };
 
   }
   private applySettings(): void {
+    this.canvasRef.width = this.img.width;
+    this.canvasRef.height = this.img.height;
     this.bufferRef.width = this.img.width;
     this.bufferRef.height = this.img.height;
-    this.bufferCtx.clearRect(0, 0, this.img.width, this.img.height);
+    this.manipulateRef.width = this.img.width;
+    this.manipulateRef.height = this.img.height;
+
+    let currentwidth = this.img.width;
+    let currentheight = this.img.height;
+    let newwidth = currentwidth;
+    let newheight = currentheight;
+    this.bufferCtx.clearRect(0, 0, currentwidth, currentheight);
     this.bufferCtx.drawImage(this.img, 0, 0);
-    this.bufferCtx.save();
 
 
-    this.manipulateRef.width = this.canvasRef.width = this.bufferRef.width;
-    this.manipulateRef.height = this.canvasRef.height = this.bufferRef.height;
 
     this.props.settings.forEach((element, index) => {
+      this.manipulateCtx.clearRect(0, 0, currentwidth, currentheight);
+      this.manipulateRef.width = currentwidth;
+      this.manipulateRef.height = currentheight;
+      this.manipulateCtx.save();
+      let nothingToDo: boolean = false
       switch (element.type) {
         case ManipulationType.Flip:
           const filp = element as IFlipSettings;
-          this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
-          this.manipulateCtx.save();
           if (filp.flipY) {
-            this.manipulateCtx.translate(0, this.manipulateRef.height);
+            this.manipulateCtx.translate(0, currentheight);
             this.manipulateCtx.scale(1, -1);
           }
           if (filp.flipX) {
-            this.manipulateCtx.translate(this.manipulateRef.width, 0);
+            this.manipulateCtx.translate(currentwidth, 0);
             this.manipulateCtx.scale(-1, 1);
           }
-
           this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
-          this.manipulateCtx.restore();
-          this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
-          this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
-          this.bufferCtx.save();
           break;
         case ManipulationType.Rotate:
           const rotate = element as IRotateSettings;
+          if (!rotate.rotate || rotate.rotate === 0 || isNaN(rotate.rotate)) {
+            nothingToDo = true;
+            break;
+          }
           if (rotate.rotate) {
-            this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
-            this.manipulateCtx.save();
             const angelcalc = rotate.rotate * Math.PI / 180;
-            const oldwidth = this.manipulateRef.width;
-            const oldheight = this.manipulateRef.height;
-            let newwidth = this.manipulateRef.width;
-            let newheight = this.manipulateRef.height;
+            const oldwidth = currentwidth;
+            const oldheight = currentheight;
             let offsetwidth = 0;
             let offsetheight = 0;
 
-              var a = oldwidth * Math.abs(Math.cos(angelcalc));
-              var b = oldheight * Math.abs(Math.sin(angelcalc));
+            var a = oldwidth * Math.abs(Math.cos(angelcalc));
+            var b = oldheight * Math.abs(Math.sin(angelcalc));
 
-              var p = oldwidth * Math.abs(Math.sin(angelcalc));
-              var q = oldheight * Math.abs(Math.cos(angelcalc));
-              newwidth = a + b;
-              newheight = p + q;
+            var p = oldwidth * Math.abs(Math.sin(angelcalc));
+            var q = oldheight * Math.abs(Math.cos(angelcalc));
+            newwidth = a + b;
+            newheight = p + q;
 
-              offsetwidth = (newwidth - oldwidth  ) / 2;
-              offsetheight =(newheight - oldheight) / 2;
-
+            offsetwidth = (newwidth - oldwidth) / 2;
+            offsetheight = (newheight - oldheight) / 2;
 
             this.manipulateRef.width = newwidth;
             this.manipulateRef.height = newheight;
@@ -156,127 +155,77 @@ export class ImageManipulation extends React.Component<IImageManipulationProps, 
             this.manipulateCtx.rotate(angelcalc);
             this.manipulateCtx.translate(newwidth / 2 * -1, newheight / 2 * -1);
 
-
-
             this.manipulateCtx.drawImage(this.bufferRef, offsetwidth, offsetheight);
-            this.manipulateCtx.restore();
 
-            this.bufferRef.width = newwidth;
-            this.bufferRef.height = newheight;
-
-            this.bufferCtx.restore();
-            this.bufferCtx.clearRect(0, 0, newwidth, newheight);
-            this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
-            this.bufferCtx.save();
           }
           break;
         case ManipulationType.Scale:
           const scale = element as IScaleSettings;
           if (scale.scale) {
-            this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
-            this.manipulateCtx.save();
-
-            let height = this.manipulateRef.height;
-            let width = this.manipulateRef.width;
-            this.manipulateCtx.translate(width / 2, height / 2);
+            this.manipulateCtx.translate(currentwidth / 2, currentheight / 2);
             this.manipulateCtx.scale(scale.scale, scale.scale);
-            this.manipulateCtx.translate(width / 2 * -1, height / 2 * -1);
+            this.manipulateCtx.translate(currentwidth / 2 * -1, currentheight / 2 * -1);
 
             this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
-            this.manipulateCtx.restore();
-
-            this.bufferCtx.restore();
-            this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
-            this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
-            this.bufferCtx.save();
           }
           break;
         case ManipulationType.Filter:
-          //skip at this time
-          // We need no effect at this time
+          nothingToDo = true;
+          const filter = element as IFilterSettings;
+          var imageData = this.bufferCtx.getImageData(0, 0, currentwidth, currentheight);
+          switch (filter.filterType) {
+            case FilterType.Grayscale:
+              imageData = new GrayscaleFilter().process(imageData, currentwidth, currentheight, undefined, undefined);
+              break;
+            case FilterType.Sepia:
+              imageData = new SepiaFilter().process(imageData, currentwidth, currentheight, undefined, undefined);
+              break;
+          }
+          this.bufferCtx.putImageData(imageData, 0, 0);
           break;
         case ManipulationType.Crop:
           const last = this.props.settings.length === index + 1;
           if (last && this.state.settingPanel === SettingPanelType.Crop) {
             //Do nothingis last and current edit
+            nothingToDo = true;
           } else {
-            this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
-            this.manipulateCtx.save();
             const crop = element as ICropSettings;
             const sourceX = crop.sx;
             const sourceY = crop.sy;
-            const sourceWidth = crop.width;
-            const sourceHeight = crop.height;
-
-
-            this.manipulateCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
-            this.manipulateCtx.restore();
-
-            this.bufferCtx.restore();
-            this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
-
-            this.bufferRef.width = sourceWidth;
-            this.bufferRef.height = sourceHeight;
-
-            this.bufferCtx.drawImage(this.manipulateRef, 0, 0);
-            this.bufferCtx.save();
-            this.manipulateRef.width = sourceWidth;
-            this.manipulateRef.height = sourceHeight;
+            newwidth = crop.width;
+            newheight = crop.height;
+            this.manipulateRef.width = newwidth;
+            this.manipulateRef.height = newheight;
+            this.manipulateCtx.drawImage(this.bufferRef, sourceX, sourceY, newwidth, newheight, 0, 0, newwidth, newheight);
           }
-
-
           break;
 
         case ManipulationType.Resize:
           const resize = element as IResizeSettings;
-          this.manipulateCtx.clearRect(0, 0, this.manipulateRef.width, this.manipulateRef.height);
-          this.manipulateCtx.save();
-
-          const targetWidth = resize.width;
-          const targetHeight = resize.height;
-
-
+          newwidth = resize.width;
+          newheight = resize.height;
           this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
-          this.manipulateCtx.restore();
-
-          this.bufferCtx.restore();
-          this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
-
-          this.bufferRef.width = targetWidth;
-          this.bufferRef.height = targetHeight;
-
-          this.bufferCtx.drawImage(this.manipulateRef, 0, 0, targetWidth, targetHeight);
-          this.bufferCtx.save();
-
-          this.manipulateRef.width = targetWidth;
-          this.manipulateRef.height = targetHeight;
-          this.canvasRef.width = targetWidth;
-          this.canvasRef.height = targetHeight;
-
       }
-    });
-    //  this.bufferCtx.clearRect(0, 0, this.bufferRef.width, this.bufferRef.height);
-    //  this.bufferCtx.drawImage(this.img, 0, 0);
-    // this.bufferCtx.restore()
-    /* if (this.props.displyMode === DisplayMode.Read && this.props.settings.crop ||
-       (this.state.settingPanel !== SettingPanelType.Crop && this.props.settings.crop)) {
-         */
+      this.manipulateCtx.restore();
 
-    const filters = this.props.settings.filter((x) => x.type === ManipulationType.Filter);
-    filters.forEach(element => {
-      const filter = element as IFilterSettings;
-      var imageData = this.bufferCtx.getImageData(0, 0, this.bufferRef.width, this.bufferRef.height);
-      switch (filter.filterType) {
-        case FilterType.Grayscale:
-          imageData = new GrayscaleFilter().process(imageData, this.bufferRef.width, this.bufferRef.height, undefined, undefined);
-          break;
-        case FilterType.Sepia:
-          imageData = new SepiaFilter().process(imageData, this.bufferRef.width, this.bufferRef.height, undefined, undefined);
-          break;
+      if (!nothingToDo) {
+        this.bufferCtx.clearRect(0, 0, currentwidth, currentheight);
+
+        this.bufferRef.width = newwidth;
+        this.bufferRef.height = newheight;
+
+        this.bufferCtx.clearRect(0, 0, newwidth, newheight);
+        this.bufferCtx.drawImage(this.manipulateRef, 0, 0, newwidth, newheight);
+
+
+        currentwidth = newwidth;
+        currentheight = newheight;
       }
-      this.bufferCtx.putImageData(imageData, 0, 0);
 
     });
+
+
+
 
     /*this.canvasCtx.clearRect(0, 0, this.canvasRef.width, this.canvasRef.height)
   //  this.canvasCtx.drawImage(this.bufferRef, 0, 0);
@@ -286,12 +235,13 @@ export class ImageManipulation extends React.Component<IImageManipulationProps, 
   const sourceHeight = 600;
 this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, this.canvasRef.width, this.canvasRef.height);
 */
-    this.canvasCtx.clearRect(0, 0, this.canvasRef.width, this.canvasRef.height);
-    this.canvasRef.width = this.bufferRef.width
-    this.canvasRef.height = this.bufferRef.height
-    //this.canvasCtx.drawImage(this.bufferRef, 0, 0);
-    this.canvasCtx.drawImage(this.bufferRef, 0, 0, this.bufferRef.width, this.bufferRef.height);
-    this.wrapperRef.style.width = this.bufferRef.width + 'px';
+    this.canvasCtx.clearRect(0, 0, currentwidth, currentheight);
+    this.canvasRef.width = currentwidth;
+    this.canvasRef.height = currentheight;
+    this.canvasCtx.drawImage(this.bufferRef, 0, 0);
+    // this.canvasCtx.drawImage(this.bufferRef, 0, 0, currentwidth, currentheight);
+    this.wrapperRef.style.width = currentwidth + 'px';
+    //this.wrapperRef.style.height = currentheight + 'px';
     //    let height = this.canvasRef.height;
     //    let width = this.canvasRef.width;
 
@@ -310,8 +260,12 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
           style={this.canvasRef && { width: '' + this.canvasRef.width + 'px' }}
         >
 
-          <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setBufferRef}></canvas>
-          <canvas className={this.getMaxWidth()} style={{ display: 'none' }} ref={this.setManipulateRef}></canvas>
+          <canvas className={this.getMaxWidth()}
+            style={{ display: 'none' }}
+            ref={this.setBufferRef}></canvas>
+          <canvas className={this.getMaxWidth()}
+            style={{ display: 'none' }}
+            ref={this.setManipulateRef}></canvas>
           <canvas className={this.getMaxWidth()} ref={this.setCanvasRef} ></canvas>
           {this.state.settingPanel === SettingPanelType.Crop && (this.getCropGrid())}
           {this.state.settingPanel === SettingPanelType.Resize && (this.getResizeGrid())}
@@ -547,12 +501,13 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
           return (<DefaultButton
             key={'rotate' + index}
-            onClick={() => { if(value === 0) {
-              this.setRotate(value)
-            } else {
-              this.calcRotate(value)
-            }
-             }}
+            onClick={() => {
+              if (value === 0) {
+                this.setRotate(value)
+              } else {
+                this.calcRotate(value)
+              }
+            }}
             className={styles.iconbtn}
           >
             <Icon iconName={icon} style={value < 0 ? { transform: 'scaleX(-1)' } : {}} className={styles.imgicon} />
