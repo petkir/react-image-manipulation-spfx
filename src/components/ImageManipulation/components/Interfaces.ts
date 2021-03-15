@@ -21,5 +21,5 @@ export interface ICropData {
   pos?: nodePoition;
   xDiff: number;
   yDiff: number;
-};
+}
 

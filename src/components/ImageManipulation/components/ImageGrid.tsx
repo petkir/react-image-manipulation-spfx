@@ -20,7 +20,7 @@ export interface IImageGridState { }
 
 export interface IResizeData {
   pos: nodePoition;
-  width: number
+  width: number;
   height: number;
   xInverse: boolean;
   yInverse: boolean;
@@ -35,14 +35,14 @@ export default class ImageGrid extends React.Component<IImageGridProps, IImageGr
   constructor(props: IImageGridProps) {
     super(props);
 
-    this.state = {}
+    this.state = {};
 
     this.onStartResizing = this.onStartResizing.bind(this);
     this.onDocMouseTouchMove = this.onDocMouseTouchMove.bind(this);
     this.onDocMouseTouchEnd = this.onDocMouseTouchEnd.bind(this);
   }
 
-  componentDidMount(): void {
+  public componentDidMount(): void {
     window.document.addEventListener("mousemove", this.onDocMouseTouchMove);
     window.document.addEventListener("touchmove", this.onDocMouseTouchMove);
     window.document.addEventListener('mouseup', this.onDocMouseTouchEnd);
@@ -50,7 +50,7 @@ export default class ImageGrid extends React.Component<IImageGridProps, IImageGr
     window.document.addEventListener('touchcancel', this.onDocMouseTouchEnd);
 
   }
-  componentWillUnmount(): void {
+  public componentWillUnmount(): void {
     window.document.removeEventListener("mousemove", this.onDocMouseTouchMove);
     window.document.removeEventListener("touchmove", this.onDocMouseTouchMove);
     window.document.removeEventListener('mouseup', this.onDocMouseTouchEnd);
@@ -114,7 +114,6 @@ export default class ImageGrid extends React.Component<IImageGridProps, IImageGr
 
   private onStartResizing(e: MouseEvent | any): void {
     const mousePos = this.getClientPos(e);
-    console.log(mousePos);
     let xInversed: boolean = false;
     let yInversed: boolean = false;
     const { ord } = e.target.dataset;
@@ -172,7 +171,7 @@ export default class ImageGrid extends React.Component<IImageGridProps, IImageGr
     let nextsize: IResize = {
       width: this.evData.width + xDiff,
       height: this.evData.height + yDiff
-    }
+    };
     if(aspect) {
       if(this.evData.pos !== nodePoition.N && this.evData.pos !== nodePoition.S) {
         nextsize.height = nextsize.width / aspect;
@@ -187,8 +186,6 @@ export default class ImageGrid extends React.Component<IImageGridProps, IImageGr
 
   private onDocMouseTouchEnd(e: MouseEvent | any): void {
     const { width, height, onDragEnd, onComplete } = this.props;
-    console.log('onDocMouseTouchEnd');
-
     if (this.dragStarted) {
       this.dragStarted = false;
       if (onDragEnd) {

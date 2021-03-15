@@ -58,7 +58,7 @@ export interface ICrop {
 export interface IResize {
   width: number;
   height: number;
-  aspect?: number
+  aspect?: number;
 }
 
 export interface ICropSettings extends IManipulationBase, ICrop {
@@ -87,19 +87,35 @@ export interface IResizeSettings extends IManipulationBase, IResize {
 export type IImageManipulationSettings = IFilterSettings | IRotateSettings | IScaleSettings | IFlipSettings | ICropSettings | IResizeSettings;
 
 
-export const filterTypeData:IFilterTypeData = {
-  0:strings.FilterTypeGrayscale,
-  1:strings.FilterTypeSepia
-}
+export const filterTypeData: IFilterTypeData = {
+  0: strings.FilterTypeGrayscale,
+  1: strings.FilterTypeSepia
+};
 
 export interface IFilterTypeData {
   [key: string]: string;
 }
+
+export interface IManipulationTypeDataBase {
+  text: string;
+  iconName?: string;
+  svgIcon?: any;
+  settingPanelType: SettingPanelType;
+}
+
+export interface IManipulationTypeData {
+  [key: string]: IManipulationTypeDataDetails;
+}
+
+export interface IManipulationTypeDataDetails extends IManipulationTypeDataBase {
+  toHTML: (item: IImageManipulationSettings) => JSX.Element;
+}
+
 export const manipulationTypeData: IManipulationTypeData = {
   0: {
     text: strings.ManipulationTypeCrop,
     svgIcon: cropIcon,
-    toHTML: (item:ICropSettings) => {
+    toHTML: (item: ICropSettings) => {
       return (<span></span>);
       //return (<span>{`X:${item.sx} Y:${item.sy}`}</span>);
     },
@@ -108,48 +124,37 @@ export const manipulationTypeData: IManipulationTypeData = {
   1: {
     text: strings.ManipulationTypeScale,
     iconName: 'Zoom',
-    toHTML: (item:IScaleSettings) => { return (<span></span>); },
+    toHTML: (item: IScaleSettings) => { return (<span></span>); },
     settingPanelType: SettingPanelType.Scale
   },
   2: {
     text: strings.ManipulationTypeRotate,
     iconName: 'Rotate',
-    toHTML: (item:IRotateSettings) => { return (<span></span>); },
+    toHTML: (item: IRotateSettings) => { return (<span></span>); },
     settingPanelType: SettingPanelType.Rotate
   },
   3: {
     text: strings.ManipulationTypeFlip,
     svgIcon: flipVerticalIcon,
-    toHTML: (item:IFlipSettings) => { return (<span></span>); },
+    toHTML: (item: IFlipSettings) => { return (<span></span>); },
     settingPanelType: SettingPanelType.Flip
   },
   4: {
     text: strings.ManipulationTypeFilter,
     svgIcon: colorFilterIcon,
-    toHTML: (item:IFilterSettings)  => {
-      console.log(item);
-      return (<span>{filterTypeData[item.filterType]}</span>); },
+    toHTML: (item: IFilterSettings) => {
+      return (<span>{filterTypeData[item.filterType]}</span>);
+    },
     settingPanelType: SettingPanelType.Filter
   },
   5: {
     text: strings.ManipulationTypeResize,
     iconName: 'SizeLegacy',
     svgIcon: resizeIcon,
-    toHTML: (item:IResizeSettings)  => { return (<span></span>); },
+    toHTML: (item: IResizeSettings) => { return (<span></span>); },
     settingPanelType: SettingPanelType.Resize
   },
 
-}
-export interface IManipulationTypeDataDetails extends IManipulationTypeDataBase {
-  toHTML: ( item: IImageManipulationSettings) => JSX.Element;
-}
+};
 
-export interface IManipulationTypeDataBase {
-  text: string;
-  iconName?: string;
-  svgIcon?: any;
-  settingPanelType: SettingPanelType
-}
-export interface IManipulationTypeData {
-  [key: string]: IManipulationTypeDataDetails;
-}
+

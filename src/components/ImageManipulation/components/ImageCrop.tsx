@@ -17,7 +17,7 @@ export interface IImageCropProps {
 
   sourceHeight: number;
   sourceWidth: number;
-  showRuler?: boolean
+  showRuler?: boolean;
   onDragStart?: (e: MouseEvent) => void;
   onComplete?: (crop: ICrop) => void;
   onChange?: (crop: ICrop) => void;
@@ -27,7 +27,7 @@ export interface IImageCropProps {
 export interface IImageCropState {
   cropIsActive: boolean;
   newCropIsBeingDrawn: boolean;
-  reloadtimestamp: string
+  reloadtimestamp: string;
 }
 
 
@@ -62,11 +62,9 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
 
   public componentDidMount(): void {
     const { crop, sourceHeight, sourceWidth } = this.props;
-    console.log('componentDidMount');
     if (crop && this.isValid(crop) &&
       (crop.sx !== 0 || crop.sy !== 0 || crop.width !== 0 && crop.height !== 0)
     ) {
-      console.log('componentDidMount');
       this.setState({ cropIsActive: true });
     } else {
       //Requireed because first renderer has no ref
@@ -153,7 +151,6 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   }
 
   private makeNewCrop(): ICrop {
-    console.log(this.props.crop.aspect ? 'aspect' : 'noaspect');
     const crop: ICrop = { ...{ sx: 0, sy: 0, height: 0, width: 0 }, ...this.props.crop };
     return crop;
   }
@@ -175,7 +172,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       [{ pageX, pageY }] = e.touches;
     }
 
-    let refpos = this.controlRef.getBoundingClientRect()
+    let refpos = this.controlRef.getBoundingClientRect();
     let startx: number = pageX - refpos.left;
     let starty: number = pageY - refpos.top;
     return ({
@@ -191,10 +188,8 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     }
 
     e.preventDefault();
-    // debugger;
     if (!this.dragStarted) {
       this.dragStarted = true;
-      console.log('onDragStart');
       if (onDragStart) {
         onDragStart(e as any);
       }
@@ -217,10 +212,8 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     let nextCrop;
 
     if (this.evData.isResize) {
-      console.log('resize');
       nextCrop = this.resizeCrop();
     } else {
-      console.log('drag');
       nextCrop = this.dragCrop();
     }
 
@@ -238,7 +231,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     const { evData } = this;
     let nextCrop: ICrop = this.makeNewCrop();
     const width: number = this.controlRef.clientWidth;
-    const height: number = this.controlRef.clientHeight
+    const height: number = this.controlRef.clientHeight;
     nextCrop.sx = clamp(evData.cropStartX + evData.xDiff, 0, width - nextCrop.width);
     nextCrop.sy = clamp(evData.cropStartY + evData.yDiff, 0, height - nextCrop.height);
 
@@ -278,7 +271,7 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
       width: newSize.width,
       height: newSize.height,
       aspect: this.props.crop.aspect
-    }
+    };
 
     if (this.props.crop.aspect || (pos === nodePoition.NW || pos === nodePoition.SE || pos === nodePoition.SW || pos === nodePoition.NE)) {
       nextCrop.sx = containedCrop.sx;
@@ -355,7 +348,6 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   }
 
   private onCropMouseTouchDown(e: MouseEvent | any): void {
-    console.log('onCropMouseTouchDown')
     const { crop } = this.props;
 
     e.preventDefault(); // Stop drag selection.
@@ -450,13 +442,11 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
   }
 
   private onMouseTouchDown(e: MouseEvent | any): void {
-
-    console.log('onMouseTouchDown')
     const { crop, onChange } = this.props;
     e.preventDefault(); // Stop drag selection.
     const mousepos = this.getClientPos(e);
 
-    let refpos = this.controlRef.getBoundingClientRect()
+    let refpos = this.controlRef.getBoundingClientRect();
     let startx: number = mousepos.x - refpos.left;
     let starty: number = mousepos.y - refpos.top;
     //is mousePos in current pos
@@ -497,6 +487,6 @@ export default class ImageCrop extends React.Component<IImageCropProps, IImageCr
     onChange(nextCrop);
 
     this.setState({ cropIsActive: true, newCropIsBeingDrawn: true });
-  };
+  }
 
 }

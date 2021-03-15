@@ -2,7 +2,7 @@ import { IImageFilter } from "./IImageFilter";
 
 
 export class GrayscaleFilter implements IImageFilter {
-  process(imageData: ImageData, width: number, height: number, nvalue?: number, svalue?: string): ImageData {
+ public process(imageData: ImageData, width: number, height: number, nvalue?: number, svalue?: string): ImageData {
     var data = imageData.data;
 
     //Get length of all pixels in image each pixel made up of 4 elements for each pixel, one for Red, Green, Blue and Alpha

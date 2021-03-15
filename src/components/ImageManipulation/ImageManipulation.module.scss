@@ -26,7 +26,10 @@ display: inline;
 
 .imageEditor{
   width: 100%;
+  position: relative;
   .commandBar{
+    position: absolute;
+    top:-32px;
     button {
       background-color: lightgray;
     }

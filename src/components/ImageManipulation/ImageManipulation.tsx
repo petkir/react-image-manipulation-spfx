@@ -27,6 +27,8 @@ export interface IImageManipulationProps {
   src: string;
   settings?: IImageManipulationSettings[];
   settingschanged?: (settings: IImageManipulationSettings[]) => void;
+  imgLoadError?: () => void;
+  editMode?: (mode: boolean) => void;
   configsettings: IImageManipulationConfig;
   displyMode: DisplayMode;
 }
@@ -81,12 +83,14 @@ export class ImageManipulation extends React.Component<IImageManipulationProps, 
     this.img.src = url;
     this.img.crossOrigin = "Anonymous";
     this.img.onload = () => {
-      this.img = this.img;
-
 
       this.applySettings();
     };
-
+    this.img.onerror = (event: Event | string) => {
+      if (this.props.imgLoadError) {
+        this.props.imgLoadError();
+      }
+    };
   }
   private applySettings(): void {
     this.canvasRef.width = this.img.width;
@@ -104,128 +108,128 @@ export class ImageManipulation extends React.Component<IImageManipulationProps, 
     this.bufferCtx.drawImage(this.img, 0, 0);
 
 
-
-    this.props.settings.forEach((element, index) => {
-      this.manipulateCtx.clearRect(0, 0, currentwidth, currentheight);
-      this.manipulateRef.width = currentwidth;
-      this.manipulateRef.height = currentheight;
-      this.manipulateCtx.save();
-      let nothingToDo: boolean = false
-      switch (element.type) {
-        case ManipulationType.Flip:
-          const filp = element as IFlipSettings;
-          if (filp.flipY) {
-            this.manipulateCtx.translate(0, currentheight);
-            this.manipulateCtx.scale(1, -1);
-          }
-          if (filp.flipX) {
-            this.manipulateCtx.translate(currentwidth, 0);
-            this.manipulateCtx.scale(-1, 1);
-          }
-          this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
-          break;
-        case ManipulationType.Rotate:
-          const rotate = element as IRotateSettings;
-          if (!rotate.rotate || rotate.rotate === 0 || isNaN(rotate.rotate)) {
-            nothingToDo = true;
-            break;
-          }
-          if (rotate.rotate) {
-            const angelcalc = rotate.rotate * Math.PI / 180;
-            const oldwidth = currentwidth;
-            const oldheight = currentheight;
-            let offsetwidth = 0;
-            let offsetheight = 0;
-
-            var a = oldwidth * Math.abs(Math.cos(angelcalc));
-            var b = oldheight * Math.abs(Math.sin(angelcalc));
-
-            var p = oldwidth * Math.abs(Math.sin(angelcalc));
-            var q = oldheight * Math.abs(Math.cos(angelcalc));
-            newwidth = a + b;
-            newheight = p + q;
-
-            offsetwidth = (newwidth - oldwidth) / 2;
-            offsetheight = (newheight - oldheight) / 2;
-
-            this.manipulateRef.width = newwidth;
-            this.manipulateRef.height = newheight;
-
-            this.manipulateCtx.translate(newwidth / 2, newheight / 2);
-            this.manipulateCtx.rotate(angelcalc);
-            this.manipulateCtx.translate(newwidth / 2 * -1, newheight / 2 * -1);
-
-            this.manipulateCtx.drawImage(this.bufferRef, offsetwidth, offsetheight);
-
-          }
-          break;
-        case ManipulationType.Scale:
-          const scale = element as IScaleSettings;
-          if (scale.scale) {
-            this.manipulateCtx.translate(currentwidth / 2, currentheight / 2);
-            this.manipulateCtx.scale(scale.scale, scale.scale);
-            this.manipulateCtx.translate(currentwidth / 2 * -1, currentheight / 2 * -1);
-
+    if (this.props.settings) {
+      this.props.settings.forEach((element, index) => {
+        this.manipulateCtx.clearRect(0, 0, currentwidth, currentheight);
+        this.manipulateRef.width = currentwidth;
+        this.manipulateRef.height = currentheight;
+        this.manipulateCtx.save();
+        let nothingToDo: boolean = false;
+        switch (element.type) {
+          case ManipulationType.Flip:
+            const filp = element as IFlipSettings;
+            if (filp.flipY) {
+              this.manipulateCtx.translate(0, currentheight);
+              this.manipulateCtx.scale(1, -1);
+            }
+            if (filp.flipX) {
+              this.manipulateCtx.translate(currentwidth, 0);
+              this.manipulateCtx.scale(-1, 1);
+            }
             this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
-          }
-          break;
-        case ManipulationType.Filter:
-          nothingToDo = true;
-          const filter = element as IFilterSettings;
-          var imageData = this.bufferCtx.getImageData(0, 0, currentwidth, currentheight);
-          switch (filter.filterType) {
-            case FilterType.Grayscale:
-              imageData = new GrayscaleFilter().process(imageData, currentwidth, currentheight, undefined, undefined);
+            break;
+          case ManipulationType.Rotate:
+            const rotate = element as IRotateSettings;
+            if (!rotate.rotate || rotate.rotate === 0 || isNaN(rotate.rotate)) {
+              nothingToDo = true;
               break;
-            case FilterType.Sepia:
-              imageData = new SepiaFilter().process(imageData, currentwidth, currentheight, undefined, undefined);
-              break;
-          }
-          this.bufferCtx.putImageData(imageData, 0, 0);
-          break;
-        case ManipulationType.Crop:
-          const last = this.props.settings.length === index + 1;
-          if (last && this.state.settingPanel === SettingPanelType.Crop) {
-            //Do nothingis last and current edit
+            }
+            if (rotate.rotate) {
+              const angelcalc = rotate.rotate * Math.PI / 180;
+              const oldwidth = currentwidth;
+              const oldheight = currentheight;
+              let offsetwidth = 0;
+              let offsetheight = 0;
+
+              var a = oldwidth * Math.abs(Math.cos(angelcalc));
+              var b = oldheight * Math.abs(Math.sin(angelcalc));
+
+              var p = oldwidth * Math.abs(Math.sin(angelcalc));
+              var q = oldheight * Math.abs(Math.cos(angelcalc));
+              newwidth = a + b;
+              newheight = p + q;
+
+              offsetwidth = (newwidth - oldwidth) / 2;
+              offsetheight = (newheight - oldheight) / 2;
+
+              this.manipulateRef.width = newwidth;
+              this.manipulateRef.height = newheight;
+
+              this.manipulateCtx.translate(newwidth / 2, newheight / 2);
+              this.manipulateCtx.rotate(angelcalc);
+              this.manipulateCtx.translate(newwidth / 2 * -1, newheight / 2 * -1);
+
+              this.manipulateCtx.drawImage(this.bufferRef, offsetwidth, offsetheight);
+
+            }
+            break;
+          case ManipulationType.Scale:
+            const scale = element as IScaleSettings;
+            if (scale.scale) {
+              this.manipulateCtx.translate(currentwidth / 2, currentheight / 2);
+              this.manipulateCtx.scale(scale.scale, scale.scale);
+              this.manipulateCtx.translate(currentwidth / 2 * -1, currentheight / 2 * -1);
+
+              this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
+            }
+            break;
+          case ManipulationType.Filter:
             nothingToDo = true;
-          } else {
-            const crop = element as ICropSettings;
-            const sourceX = crop.sx;
-            const sourceY = crop.sy;
-            newwidth = crop.width;
-            newheight = crop.height;
-            this.manipulateRef.width = newwidth;
-            this.manipulateRef.height = newheight;
-            this.manipulateCtx.drawImage(this.bufferRef, sourceX, sourceY, newwidth, newheight, 0, 0, newwidth, newheight);
-          }
-          break;
+            const filter = element as IFilterSettings;
+            var imageData = this.bufferCtx.getImageData(0, 0, currentwidth, currentheight);
+            switch (filter.filterType) {
+              case FilterType.Grayscale:
+                imageData = new GrayscaleFilter().process(imageData, currentwidth, currentheight, undefined, undefined);
+                break;
+              case FilterType.Sepia:
+                imageData = new SepiaFilter().process(imageData, currentwidth, currentheight, undefined, undefined);
+                break;
+            }
+            this.bufferCtx.putImageData(imageData, 0, 0);
+            break;
+          case ManipulationType.Crop:
+            const last = this.props.settings.length === index + 1;
+            if (last && this.state.settingPanel === SettingPanelType.Crop) {
+              //Do nothingis last and current edit
+              nothingToDo = true;
+            } else {
+              const crop = element as ICropSettings;
+              const sourceX = crop.sx;
+              const sourceY = crop.sy;
+              newwidth = crop.width;
+              newheight = crop.height;
+              this.manipulateRef.width = newwidth;
+              this.manipulateRef.height = newheight;
+              this.manipulateCtx.drawImage(this.bufferRef, sourceX, sourceY, newwidth, newheight, 0, 0, newwidth, newheight);
+            }
+            break;
 
-        case ManipulationType.Resize:
-          const resize = element as IResizeSettings;
-          newwidth = resize.width;
-          newheight = resize.height;
-          this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
-      }
-      this.manipulateCtx.restore();
+          case ManipulationType.Resize:
+            const resize = element as IResizeSettings;
+            newwidth = resize.width;
+            newheight = resize.height;
+            this.manipulateCtx.drawImage(this.bufferRef, 0, 0);
+        }
+        this.manipulateCtx.restore();
 
-      if (!nothingToDo) {
-        this.bufferCtx.clearRect(0, 0, currentwidth, currentheight);
+        if (!nothingToDo) {
+          this.bufferCtx.clearRect(0, 0, currentwidth, currentheight);
 
-        this.bufferRef.width = newwidth;
-        this.bufferRef.height = newheight;
+          this.bufferRef.width = newwidth;
+          this.bufferRef.height = newheight;
 
-        this.bufferCtx.clearRect(0, 0, newwidth, newheight);
-        this.bufferCtx.drawImage(this.manipulateRef, 0, 0, newwidth, newheight);
-
-
-        currentwidth = newwidth;
-        currentheight = newheight;
-      }
-
-    });
+          this.bufferCtx.clearRect(0, 0, newwidth, newheight);
+          this.bufferCtx.drawImage(this.manipulateRef, 0, 0, newwidth, newheight);
 
 
+          currentwidth = newwidth;
+          currentheight = newheight;
+        }
 
+      });
+
+
+    }
 
     /*this.canvasCtx.clearRect(0, 0, this.canvasRef.width, this.canvasRef.height)
   //  this.canvasCtx.drawImage(this.bufferRef, 0, 0);
@@ -253,10 +257,12 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
   public render(): React.ReactElement<IImageManipulationProps> {
     return (
-      <div className={styles.imageEditor} >
+      <div className={styles.imageEditor} style={{
+        marginTop: this.props.displyMode === DisplayMode.Edit ? '40px' : '0px',
+      }} >
         {this.props.displyMode === DisplayMode.Edit && this.getCommandBar()}
         <div className={styles.imageplaceholder + ' ' + this.getMaxWidth()}
-          ref={(element: HTMLDivElement) => { this.wrapperRef = element }}
+          ref={(element: HTMLDivElement) => { this.wrapperRef = element; }}
           style={this.canvasRef && { width: '' + this.canvasRef.width + 'px' }}
         >
 
@@ -322,7 +328,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   private closeFilter(): void {
     this.setState({
       settingPanel: SettingPanelType.Closed
-    });
+    }, () => this.toggleEditMode(false));
   }
   private getPanelHeader(settingPanel: SettingPanelType): string {
     switch (settingPanel) {
@@ -370,7 +376,13 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
   private openPanel(settingPanel: SettingPanelType): void {
     this.setState({
       settingPanel: settingPanel
-    });
+    }, () => this.toggleEditMode(true));
+  }
+
+  private toggleEditMode(mode: boolean) {
+    if (this.props.editMode) {
+      this.props.editMode(mode);
+    }
   }
 
   private getHistorySettings(): JSX.Element {
@@ -445,20 +457,17 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         title={strings.FlipHorizontal}
         ariaLabel={strings.FlipHorizontal}
         onClick={() => {
-          console.log('flip x clicked');
+
           let last = this.getLastManipulation();
           if (last && last.type === ManipulationType.Flip) {
             (last as IFlipSettings).flipX = !(last as IFlipSettings).flipX;
             if ((last as IFlipSettings).flipX === false &&
               (last as IFlipSettings).flipY === false) {
-              console.log('removeflip element');
               this.removeLastManipulation();
             } else {
-              console.log('Add or Update');
               this.addOrUpdateLastManipulation(last);
             }
           } else {
-            console.log('Add or Update new set');
             this.addOrUpdateLastManipulation({ type: ManipulationType.Flip, flipX: true, flipY: false });
           }
         }}
@@ -491,7 +500,6 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     if (lastvalue && lastvalue.type === ManipulationType.Rotate) {
       rotatevalue = (lastvalue as IRotateSettings).rotate ? (lastvalue as IRotateSettings).rotate : 0;
     }
-    console.log('RotateValue: ' + rotatevalue);
     return (<div>
       <div>
         {this.props.configsettings.rotateButtons.map((value: number, index: number) => {
@@ -503,9 +511,9 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
             key={'rotate' + index}
             onClick={() => {
               if (value === 0) {
-                this.setRotate(value)
+                this.setRotate(value);
               } else {
-                this.calcRotate(value)
+                this.calcRotate(value);
               }
             }}
             className={styles.iconbtn}
@@ -539,7 +547,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         disabled={!(lastvalue && lastvalue.type === ManipulationType.Rotate)}
         iconProps={{ iconName: 'Undo' }}
         ariaLabel={strings.CommandBarReset}
-        onClick={() => { this.removeLastManipulation() }
+        onClick={() => { this.removeLastManipulation(); }
         }
       />
     </div >);
@@ -618,14 +626,14 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         iconProps={{ iconName: 'Undo' }}
         title={strings.CommandBarReset}
         ariaLabel={strings.CommandBarReset}
-        onClick={() => { this.setScale(1) }
+        onClick={() => { this.setScale(1); }
         }
       />
     </div>);
   }
 
   private getResizeValues(): IResizeSettings {
-    let state: IImageManipulationSettings = this.getLastManipulation()
+    let state: IImageManipulationSettings = this.getLastManipulation();
     let values: IResizeSettings = {
       type: ManipulationType.Resize,
       height: this.bufferRef.height,
@@ -639,14 +647,24 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
   private setResize(width: number, height: number, aspect: number): void {
     let values: IResizeSettings = this.getResizeValues();
-    if (width) { values.width = width; }
-    if (height) { values.height = height; }
+    if (width) {
+      values.width = width;
+      if (aspect) {
+        values.height = values.width / aspect;
+      }
+    }
+    if (height) {
+      values.height = height;
+      if (aspect) {
+        values.width = values.height * aspect;
+      }
+    }
     values.aspect = aspect;
     this.addOrUpdateLastManipulation(values);
   }
 
   private getCropValues(): ICropSettings {
-    let state: IImageManipulationSettings = this.getLastManipulation()
+    let state: IImageManipulationSettings = this.getLastManipulation();
     let values: ICropSettings = {
       type: ManipulationType.Crop,
       sx: 0,
@@ -662,11 +680,71 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
   private setCrop(sx: number, sy: number, width: number, height: number, aspect: number): void {
     let values = this.getCropValues();
-    if (!isNaN(sx)) { values.sx = sx; }
-    if (!isNaN(sy)) { values.sy = sy; }
-    if (!isNaN(width)) { values.width = width; }
-    if (!isNaN(height)) { values.height = height; }
+    const currentheight: number = this.bufferRef.height;
+    const currentwidth: number = this.bufferRef.width;
+    if (!isNaN(sx) && sx >= 0) {
+      if (sx >= currentwidth) {
+        values.sx = currentwidth - 1;
+      } else {
+        values.sx = sx;
+      }
+
+      // limit max width
+      if ((values.width + values.sx) > currentwidth) {
+        values.width = currentwidth - values.sx;
+      }
+
+    }
+    if (!isNaN(sy) && sy >= 0) {
+      if (sy >= currentheight) {
+        values.sy = currentheight - 1;
+      } else {
+        values.sy = sy;
+      }
+
+      // limit max height
+      if ((values.height + values.sy) > currentheight) {
+        values.height = currentheight - values.sy;
+      }
+    }
+    if (!isNaN(width) && width >= 0) {
+      if ((width + values.sx) > currentwidth) {
+        values.width = currentwidth - values.sx;
+      } else {
+        values.width = width;
+      }
+    }
+    if (!isNaN(height) && height >= 0) {
+      if ((height + values.sy) > currentheight) {
+        values.height = currentheight - values.sy;
+      } else {
+        values.height = height;
+      }
+    }
+    if (isNaN(values.aspect) && !isNaN(aspect)) {
+      //aspect added
+
+      //limit w
+      if ((values.width + values.sx) > currentwidth) {
+        values.width = currentwidth - values.sx;
+      }
+
+      values.height = values.width / aspect;
+      //limit h adn recalulate w
+      if ((values.height + values.sy) > currentheight) {
+        values.height = currentheight - values.sy;
+        values.width = values.height * aspect;
+      }
+
+
+    }
     values.aspect = aspect;
+    if (aspect && (!isNaN(sx) || !isNaN(width))) {
+      values.height = values.width / aspect;
+    }
+    if (aspect && (!isNaN(sy) || !isNaN(height))) {
+      values.width = values.height * aspect;
+    }
     this.addOrUpdateLastManipulation(values);
   }
 
@@ -687,7 +765,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     const lastVal = this.getLastManipulation();
     let cvalue = 0;
     if (lastVal && lastVal.type === ManipulationType.Rotate) {
-      cvalue = (lastVal as IRotateSettings).rotate
+      cvalue = (lastVal as IRotateSettings).rotate;
     }
     cvalue = cvalue + value;
     if (cvalue < -180) { cvalue = -180; }
@@ -695,21 +773,34 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     this.addOrUpdateLastManipulation({
       type: ManipulationType.Rotate,
       rotate: cvalue
-    })
+    });
   }
 
   private setCanvasRef(element: HTMLCanvasElement): void {
     this.canvasRef = element;
-    this.canvasCtx = element.getContext('2d');
+    if (this.canvasRef) {
+      this.canvasCtx = element.getContext('2d');
+    } else {
+      console.log('no canvas context ');
+    }
   }
   private setBufferRef(element: HTMLCanvasElement): void {
     this.bufferRef = element;
-    this.bufferCtx = element.getContext('2d');
+    if (this.bufferRef) {
+      this.bufferCtx = element.getContext('2d');
+    } else {
+      console.log('no buffer context ');
+    }
+
   }
 
   private setManipulateRef(element: HTMLCanvasElement): void {
     this.manipulateRef = element;
-    this.manipulateCtx = element.getContext('2d');
+    if (this.manipulateRef) {
+      this.manipulateCtx = element.getContext('2d');
+    } else {
+      console.log('no manipulation context ');
+    }
   }
 
   private getLastManipulation(): IImageManipulationSettings {
@@ -719,13 +810,13 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
     return undefined;
   }
   private addOrUpdateLastManipulation(changed: IImageManipulationSettings): void {
-    let state = clone(this.props.settings)
+    let state = clone(this.props.settings);
     if (!state) {
-      state = []
+      state = [];
     }
 
     if (state.length > 0 && state[state.length - 1].type === changed.type) {
-      state[state.length - 1] = changed
+      state[state.length - 1] = changed;
 
     } else {
       state.push(changed);
@@ -746,7 +837,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
 
   private removeLastManipulation(): void {
     if (this.props.settings && this.props.settings.length > 0) {
-      let state = clone(this.props.settings)
+      let state = clone(this.props.settings);
       state.splice(state.length - 1, 1);
       if (this.props.settingschanged) {
         this.props.settingschanged(clone(state));
@@ -759,7 +850,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
       iconProps={{ iconName: options.iconName }}
       onRenderIcon={(p, defaultrenderer) => {
         if (options.svgIcon) {
-          return (<img className={styles.svgbutton} src={options.svgIcon} />)
+          return (<img className={styles.svgbutton} src={options.svgIcon} />);
         }
         return defaultrenderer(p);
       }}
@@ -784,7 +875,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         ariaLabel={strings.CommandBarUndo}
         disabled={!this.props.settings || this.props.settings.length < 1}
         onClick={() => {
-          const settings = clone(this.props.settings)
+          const settings = clone(this.props.settings);
           const last = settings.pop();
           const redo = clone(this.state.redosettings);
           redo.push(last);
@@ -803,7 +894,7 @@ this.canvasCtx.drawImage(this.bufferRef, sourceX, sourceY, sourceWidth, sourceHe
         ariaLabel={strings.CommandBarRedo}
         disabled={!this.state.redosettings || this.state.redosettings.length < 1}
         onClick={() => {
-          const redosettings = clone(this.state.redosettings)
+          const redosettings = clone(this.state.redosettings);
           const redo = redosettings.pop();
           const settings = clone(this.props.settings);
           settings.push(redo);

@@ -8,7 +8,7 @@ export const historyItem = (item:IImageManipulationSettings, index:number): JSX.
   if(!item) {
     return undefined;
   }
-  const data=manipulationTypeData[item.type]
+  const data=manipulationTypeData[item.type];
 
   const detailrender = data.toHTML(item);
     return (
