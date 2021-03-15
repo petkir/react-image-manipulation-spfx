@@ -35,7 +35,7 @@ if (nesting.length > 0) {
         if (config && typeof config === "string") {
           const contents = JSON.parse(config);
           if (contents && contents.localizedResources && !contents.localizedResources.ControlStrings) {
-            contents.localizedResources["ImageManipulationStrings"] = "node_modules/petkir/react-image-manipulation-spfx/lib/loc/{locale}.js";
+            contents.localizedResources["ImageManipulationStrings"] = "node_modules/react-image-manipulation-spfx/lib/components/ImageManipulation/loc/{locale}.js";
             // Update the file
             fs.writeFileSync(fileLoc, JSON.stringify(contents, null, 2));
             console.log("INFO: Localized resource added.");
