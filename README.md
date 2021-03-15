@@ -1,21 +1,11 @@
 # react-image-manipulation-spfx
 
 
-Bugs:
-ASpect loc durring entry Crop and Scale
-
-Impovements:
-Rotate switch size to max x maxy (Edge cutting)
-
-Missing Features:
-ImageFocus Point missiong
 
 
 ## Summary
 
-Short summary on functionality and used technologies.
 
-[picture of the solution in action, if possible]
 
 ## Used SharePoint Framework Version
 
@@ -42,8 +32,8 @@ folder name | Author details (name, company, twitter alias with link)
 
 Version|Date|Comments
 -------|----|--------
-1.1|March 10, 2021|Update comment
-1.0|January 29, 2021|Initial release
+0.0.1|March 10, 2021|Update comment
+
 
 ## Disclaimer
 
