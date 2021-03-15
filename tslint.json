@@ -1,0 +1,125 @@
+{
+  "rules": {
+    "class-name": false,
+    "export-name": false,
+    "forin": false,
+    "label-position": false,
+    "member-access": true,
+    "no-arg": false,
+    "no-console": false,
+    "no-construct": false,
+    "no-duplicate-variable": true,
+    "no-eval": false,
+    "no-function-expression": true,
+    "no-internal-module": true,
+    "no-shadowed-variable": true,
+    "no-switch-case-fall-through": true,
+    "no-unnecessary-semicolons": true,
+    "semicolon": true,
+    "trailing-comma": false,
+
+    "typedef-whitespace": false,
+    "use-named-parameter": true,
+    "variable-name": true,
+
+    "max-line-length": [
+      true,
+      120
+    ],
+    "member-ordering": [
+      true,
+      {
+        "order": "fields-first"
+      }
+    ],
+  "object-literal-sort-keys": false,
+  "no-empty-interface": false,
+  "no-trailing-whitespace": true,
+
+    "object-literal-key-quotes": [
+      true,
+      "as-needed"
+    ],
+    "one-line": [
+      true,
+      "check-open-brace",
+      "check-catch",
+      "check-else",
+      "check-whitespace"
+    ],
+    "quotemark": [
+      true,
+      "single"
+    ], "no-for-in-array": true,
+    "no-implicit-dependencies": true,
+    "no-import-side-effect": true,
+    "no-increment-decrement": true,
+    "no-invalid-regexp": true,
+    "no-invalid-template-strings": true,
+    "no-invalid-this": true,
+    "no-jquery-raw-elements": true,
+    "no-misused-new": true,
+    "no-non-null-assertion": true,
+    "no-object-literal-type-assertion": true,
+    "no-parameter-reassignment": true,
+    "no-reference-import": true,
+    "no-regex-spaces": true,
+    "no-sparse-arrays": true,
+    "no-string-literal": true,
+    "no-string-throw": true,
+    "no-submodule-imports": false,
+    "no-unnecessary-bind": true,
+    "no-unnecessary-callback-wrapper": true,
+    "no-unnecessary-initializer": true,
+    "no-unnecessary-override": true,
+    "no-unsafe-any": false,
+    "no-unsafe-finally": true,
+    "no-unused-expression": true,
+    "no-use-before-declare": true,
+    "no-with-statement": true,
+    "promise-function-async": true,
+    "promise-must-complete": true,
+    "radix": true,
+    "react-this-binding-issue": true,
+    "react-unused-props-and-state": true,
+    "restrict-plus-operands": false,
+    "strict-boolean-expressions": false,
+    "switch-default": true,
+    "switch-final-break": false,
+    "triple-equals": [
+      true,
+      "allow-null-check"
+    ],
+    "use-isnan": true,
+    "newline-before-return": false,
+    "no-consecutive-blank-lines": true,
+    "no-empty-line-after-opening-brace": false,
+    "no-irregular-whitespace": true,
+    "no-single-line-block-comment": true,
+    "no-any": false ,
+    "no-unused-variable": true,
+    "whitespace": [
+      true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-separator",
+      "check-type"
+    ],
+    "typedef": [
+      true,
+      "call-signature",
+
+      "parameter",
+
+      "property-declaration",
+      "variable-declaration",
+      "member-variable-declaration"
+    ],
+    "no-var-keyword": true,
+    "prefer-const": true,
+    "comment-format": true
+  }
+
+
+}

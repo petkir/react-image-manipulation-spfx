@@ -1,7 +1,6 @@
 import * as React from 'react';
-//import styles from './ImageSample.module.scss';
+
 import { IImageSampleProps } from './IImageSampleProps';
-//import { escape } from '@microsoft/sp-lodash-subset';
 import { ImageManipulation } from '../../../components/ImageManipulation';
 import { IImageManipulationSettings } from '../../../components/ImageManipulation';
 
@@ -25,7 +24,7 @@ export default class ImageSample extends React.Component<IImageSampleProps, IIma
     }
   }
   public render(): React.ReactElement<IImageSampleProps> {
-
+    const url: string = 'https://media.gettyimages.com/photos/whitewater-paddlers-descend-vertical-waterfall-in-kayak-picture-id1256321293?s=2048x2048';
 
     return (
       <div>
@@ -37,11 +36,9 @@ export default class ImageSample extends React.Component<IImageSampleProps, IIma
           }
           displyMode={this.props.displyMode}
           settingschanged={(x) => { this.setState({ settings: x }); }}
-          src={'https://media.gettyimages.com/photos/whitewater-paddlers-descend-vertical-waterfall-in-kayak-picture-id1256321293?s=2048x2048'}
+          src={url}
         />
       </div>
     );
-
-
   }
 }
