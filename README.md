@@ -3,8 +3,11 @@
 
 This is a open source library that shares a reusable React control that can be used in your SharePoint Framework solutions.
 Thanks to [celum](https://www.celum.com/) and [cubido](https://www.cubido.at/) to make this control public.
-![celum](https://www.celum.com/wp-content/uploads/2019/08/celum-header-logo@2x.png)
-![cubido](https://www.cubido.at/hs-fs/hubfs/cubido%20Logo%202019/cubido_Logo_72dpi_wei%C3%9FerHG.png?width=150&name=cubido_Logo_72dpi_wei%C3%9FerHG.png)
+
+
+<img alt="celum logo" src="https://www.celum.com/wp-content/uploads/2019/08/celum-header-logo@2x.png" height="80"  />
+<img alt="cubido logo" src="https://www.cubido.at/hs-fs/hubfs/cubido%20Logo%202019/cubido_Logo_72dpi_wei%C3%9FerHG.png?width=150&name=cubido_Logo_72dpi_wei%C3%9FerHG.png" height="80" />
+
 
 ## Summary
 
@@ -19,7 +22,7 @@ ImageManipulation Control Features:
 * Redo / Undo
 * Histoy of Actions
 
-![react-image-manipulation-spfx in action](./docs/react-image-manipulation-spfx.png)
+![react-image-manipulation-spfx in action](docs/react-image-manipulation-spfx.gif)
 
 
 ## Used SharePoint Framework Version
