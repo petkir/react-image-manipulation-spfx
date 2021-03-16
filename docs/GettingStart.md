@@ -29,17 +29,20 @@ To use this control go to your web part and add it to the render method
   settingschanged={(x) => { this.setState({ settings: x }); }}
   src={url}
 />
-        ```
+```
+
 Import references:
 ```
 import {ImageManipulation,IImageManipulationSettings} from 'react-image-manipulation-spfx'
 ```
+
 Minimal State Object
 ```
 export interface IHelloWorldState{
   settings: IImageManipulationSettings[];
 }
 ```
+
 add initial state to your constructor
 ```
 constructor(props:IHelloWorldProps) {
@@ -86,5 +89,4 @@ export default class HelloWorld extends React.Component<IHelloWorldProps, IHello
     );
   }
 }
-
 ```
