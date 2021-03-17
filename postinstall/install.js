@@ -4,6 +4,10 @@ const fs = require('fs');
 const path = require('path');
 
 console.log(`
+  ___                              ___
+ (o o)                            (o o)
+(  V  ) react-image-manipulation (  V  )
+--m-m------------------------------m-m--
 `);
 console.log("INFO: Adding the required localized resource configuration to the config.json file.");
 
